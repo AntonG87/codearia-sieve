@@ -132,6 +132,7 @@ Expected outcomes never throw. They come back as warnings, each named:
 | `empty-without-js` | the article container is empty and a script would fill it |
 | `thin-content` | a big page that yielded little prose — a front page, a listing |
 | `block-split` | one block exceeded the budget and was cut on sentence boundaries |
+| `facts-capped` | the page has more facts than the 500 listed — a long fee schedule, say |
 
 </details>
 

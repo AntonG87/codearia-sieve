@@ -101,7 +101,9 @@ const AGO_BEFORE = /(?:לפני|قبل|منذ|il y a|hace|vor|před|назад)\
 /** A lower bound written right before the number: "3–329 секунд", "70-500 ms". */
 const RANGE_LOW = /(\d+(?:[.,]\d+)?)\s*[–—-]\s*$/;
 
-const MAX_FACTS = 200;
+/** A fee schedule with 190 rows is 400 facts; past this the caller is told the list is cut. */
+export const FACT_CAP = 500;
+const MAX_FACTS = FACT_CAP;
 const CONTEXT_CHARS = 220;
 
 export type NumberLocale = 'ru' | 'en' | 'unknown';

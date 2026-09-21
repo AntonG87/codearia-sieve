@@ -124,7 +124,7 @@ Three things make this shape useful:
 
 Expected outcomes do not throw. They come back as named warnings:
 `robots-disallowed`, `fetch-failed`, `blocked`, `http-error`, `paywall`, `empty-without-js`,
-`no-main-content`, `thin-content`, `fallback-extractor`, `block-split`.
+`no-main-content`, `thin-content`, `fallback-extractor`, `block-split`, `facts-capped`.
 
 ## Fitting jev-mcp
 

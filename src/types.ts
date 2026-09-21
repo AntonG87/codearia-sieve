@@ -117,7 +117,9 @@ export interface Warning {
     /** Lots of markup, little article: a front page, a listing, or an app shell. */
     | 'thin-content'
     | 'fallback-extractor'
-    | 'block-split';
+    | 'block-split'
+    /** The page carries more facts than are listed; the first FACT_CAP are kept. */
+    | 'facts-capped';
   detail?: string;
 }
 

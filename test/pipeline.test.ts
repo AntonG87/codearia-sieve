@@ -355,3 +355,14 @@ test('the walled part named in JSON-LD decides: served in full is no paywall, mi
   const b = await sieve({ kind: 'html', html: brief, url: 'https://news.example/brief' }, { now: NOW });
   assert.ok(!b.warnings.some((w) => w.code === 'paywall'), JSON.stringify(b.warnings));
 });
+
+// Lab 5 (government fee schedules): a 190-row table is 400 facts, and the
+// old cap of 200 cut the list without a word.
+test('a long fee schedule keeps its facts, and a cut list is announced', async () => {
+  const rows = Array.from({ length: 300 }, (_, i) => `<tr><td>Service ${i}</td><td>£${100 + i}</td><td>£${200 + i}</td></tr>`).join('');
+  const html = `<html><body><article><h1>Fees</h1><p>${'The schedule below lists every fee. '.repeat(10)}</p><table><tr><th>Service</th><th>Standard</th><th>Priority</th></tr>${rows}</table></article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://gov.example/fees' }, { now: NOW });
+  assert.equal(r.state.facts.length, 500);
+  assert.ok(r.warnings.some((w) => w.code === 'facts-capped'), JSON.stringify(r.warnings));
+  assert.deepEqual(r.state.facts[0], { label: 'service', value: 100, unit: 'GBP', context: 'Service: Service 0 | Standard: £100 | Priority: £200', from: r.state.facts[0]!.from });
+});

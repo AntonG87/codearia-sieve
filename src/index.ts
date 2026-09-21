@@ -5,7 +5,7 @@ import { chunk } from './chunk.ts';
 import { toMarkdown } from './markdown.ts';
 import { defaultTokenizer } from './tokenizer.ts';
 import { fromByline } from './normalize/dates.ts';
-import { extractFacts } from './normalize/numbers.ts';
+import { extractFacts, FACT_CAP } from './normalize/numbers.ts';
 import type { Input, Result, SieveOptions, State, Tokenizer, Warning } from './types.ts';
 
 export type * from './types.ts';
@@ -27,7 +27,7 @@ const PAYWALL_TEASER_CHARS = 3_000;
 const PAYWALL_TEASER_SHARE = 0.8;
 
 /** Bot challenges and refusals; the status alone is not enough (some send 200). */
-const BLOCK_TITLE = /just a moment|attention required|access denied|are you a human|human verification|verify you are|robot check|captcha/i;
+const BLOCK_TITLE = /just a moment|attention required|access denied|request access|are you a human|human verification|verify you are|robot check|captcha|automated tool|javascript is disabled/i;
 const BLOCK_STATUS = new Set([401, 403, 405, 429, 503]);
 
 /**
@@ -95,6 +95,9 @@ export async function sieve(input: Input, options: SieveOptions = {}): Promise<R
   const language = extracted?.language || guessLanguage(blocks.map((b) => b.text).join(' ').slice(0, 4000));
 
   const state: State = { facts: extractFacts(blocks, language), chunks: packed.chunks };
+  if (state.facts.length >= FACT_CAP) {
+    warnings.push({ code: 'facts-capped', detail: `the first ${FACT_CAP} facts are listed; the page has more` });
+  }
   if (extracted?.title) state.title = extracted.title;
   if (language) state.language = language;
 
