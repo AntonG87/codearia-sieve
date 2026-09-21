@@ -34,14 +34,13 @@
     }
   },
   "bin": {
-    "codearia-sieve": "./dist/mcp/cli.js"
+    "codearia-sieve": "dist/mcp/cli.js"
   },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
-  "private": true,
   "publishConfig": {
     "access": "public"
   },

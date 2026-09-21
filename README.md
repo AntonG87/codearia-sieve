@@ -13,6 +13,7 @@
 <p align="center">
   <a href="#use-it-from-an-agent"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-FF6B35?style=flat-square"></a>
   <a href="#use-it-as-a-library"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-library-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
+  <a href="https://www.npmjs.com/package/codearia-sieve"><img alt="npm" src="https://img.shields.io/npm/v/codearia-sieve?style=flat-square&color=F5EFE6&labelColor=0a0a0a"></a>
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
   <img alt="Tests" src="https://img.shields.io/badge/tests-50%20passing%2C%20offline-F5EFE6?style=flat-square&labelColor=0a0a0a">
   <img alt="No model, no key" src="https://img.shields.io/badge/runs%20without-a%20model%20or%20an%20API%20key-F5EFE6?style=flat-square&labelColor=0a0a0a">
@@ -146,8 +147,6 @@ You say what you want in plain words. The agent finds the pages, calls `sieve_pa
 ```json
 { "mcpServers": { "sieve": { "command": "npx", "args": ["-y", "codearia-sieve"] } } }
 ```
-
-<sub>Until the package is on npm: <code>"command": "node", "args": ["/path/to/codearia-sieve/dist/mcp/cli.js"]</code>.</sub>
 
 <table>
 <tr>
