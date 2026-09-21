@@ -50,7 +50,9 @@ export function chunk(blocks: Block[], budget: Budget, tokenizer: Tokenizer): Ch
     const fits = tokens + pieceTokens <= budget.maxTokens && joined.length <= budget.maxChars;
     // A section that would not fit whole starts its own chunk: closing a
     // half-full chunk at a heading keeps the anchor honest about what follows.
-    const sectionStart = block.kind === 'heading' && tokens >= budget.maxTokens * HEADING_CLOSE_SHARE;
+    // Either limit counts: English hits the character ceiling long before the token one.
+    const fullness = Math.max(tokens / budget.maxTokens, text.length / budget.maxChars);
+    const sectionStart = block.kind === 'heading' && fullness >= HEADING_CLOSE_SHARE;
     if (!fits || sectionStart) close();
     text = text ? `${text}\n\n${piece}` : piece;
     tokens += pieceTokens;
