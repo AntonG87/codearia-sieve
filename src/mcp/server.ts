@@ -8,8 +8,12 @@
  * project exists to stop.
  */
 
+import { createRequire } from 'node:module';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+
+// The package version, so serverInfo never lags behind a release.
+const { version: VERSION } = createRequire(import.meta.url)('../../package.json') as { version: string };
 import { sieve } from '../index.ts';
 import type { Input, Result, SieveOptions } from '../types.ts';
 
@@ -111,7 +115,7 @@ export function present(result: Result, mode: (typeof MODES)[number]) {
 }
 
 export function createServer(defaults: SieveOptions = {}): McpServer {
-  const server = new McpServer({ name: 'codearia-sieve', version: '0.1.0' });
+  const server = new McpServer({ name: 'codearia-sieve', version: VERSION });
 
   server.registerTool(
     'sieve_page',
