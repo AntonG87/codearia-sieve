@@ -366,3 +366,38 @@ test('a long fee schedule keeps its facts, and a cut list is announced', async (
   assert.ok(r.warnings.some((w) => w.code === 'facts-capped'), JSON.stringify(r.warnings));
   assert.deepEqual(r.state.facts[0], { label: 'service', value: 100, unit: 'GBP', context: 'Service: Service 0 | Standard: £100 | Priority: £200', from: r.state.facts[0]!.from });
 });
+
+// Lab 6 (long documents): an old RFC starts with <pre> and has no <body>;
+// the WHATWG specs omit the <body> start tag; RFC 9110's "#content" is a
+// table of contents and Defuddle kept one section of 400 000 characters.
+test('a body-less document is read whole, not lost outside an empty body', async () => {
+  const pre = (n: number) => `<pre>Section ${n}. ${'The grammar of a JSON value is given below and every implementation MUST follow it. '.repeat(20)}</pre>`;
+  const html = `${pre(1)}<span class="grey">[Page 1]</span>${pre(2)}${pre(3)}`;
+  const r = await sieve({ kind: 'html', html, url: 'https://rfc.example/rfc1' }, { now: NOW });
+  assert.ok(r.usage.stateChars > 4000, `kept ${r.usage.stateChars} chars`);
+  assert.ok(!r.warnings.some((w) => w.code === 'no-main-content' || w.code === 'empty-without-js'), JSON.stringify(r.warnings));
+  const spec = `<!DOCTYPE html><html><head><title>Spec</title></head><h1>Parsing</h1>${'<p>The tokenizer state machine reads one code point at a time and emits tokens. </p>'.repeat(60)}</html>`;
+  const s = await sieve({ kind: 'html', html: spec, url: 'https://spec.example/parsing' }, { now: NOW });
+  assert.ok(s.usage.visibleChars > 4000, `visible ${s.usage.visibleChars}`);
+  assert.ok(!s.warnings.some((w) => w.code === 'empty-without-js'), JSON.stringify(s.warnings));
+});
+
+test('a small #content beside a huge document does not stand in for it', async () => {
+  const toc = '<div id="content"><ul>' + Array.from({ length: 20 }, (_, i) => `<li><a href="#s${i}">Section ${i}</a></li>`).join('') + '</ul></div>';
+  const sections = Array.from({ length: 40 }, (_, i) => `<section id="s${i}"><h2>Section ${i}</h2>${`<p>A server that receives a request it cannot fulfil responds with a status code from this section. <a href="#p${i}">¶</a></p>`.repeat(12)}</section>`).join('');
+  const html = `<html><body>${toc}${sections}</body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://rfc.example/rfc9110' }, { now: NOW });
+  assert.ok(r.usage.visibleChars > 30000, `visible ${r.usage.visibleChars}`);
+  assert.ok(r.usage.stateChars > 30000, `kept ${r.usage.stateChars}`);
+});
+
+test('an oversized table is cut between rows, not inside one', async () => {
+  const rows = Array.from({ length: 1500 }, (_, i) => `<tr><td>E${i}</td><td>${'An error that occurs when the parser meets an unexpected character in this state. '.repeat(3)}</td></tr>`).join('');
+  const html = `<html><body><article><h1>Errors</h1><table><tr><th>Code</th><th>Description</th></tr>${rows}</table></article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://spec.example/errors' }, { now: NOW, budget: { maxTokens: 8000, maxChars: 30000 } });
+  assert.ok(r.warnings.some((w) => w.code === 'block-split'));
+  for (const c of r.state.chunks) {
+    assert.ok(c.text.startsWith('Code: E') || c.text.startsWith('Code | '), c.text.slice(0, 40));
+    assert.ok(/\.$/.test(c.text.trimEnd()), c.text.slice(-40));
+  }
+});

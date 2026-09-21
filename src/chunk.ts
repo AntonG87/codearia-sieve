@@ -76,8 +76,12 @@ function split(text: string, budget: Budget, tokenizer: Tokenizer): string[] {
     buffer = '';
   };
 
-  for (const unit of units(text)) {
-    const candidate = buffer ? `${buffer} ${unit}` : unit;
+  // A table or a list is cut between its lines, never inside one; prose
+  // between sentences.
+  const byLine = text.split('\n').length >= 3;
+  const joiner = byLine ? '\n' : ' ';
+  for (const unit of units(text, byLine)) {
+    const candidate = buffer ? `${buffer}${joiner}${unit}` : unit;
     if (fits(candidate)) {
       buffer = candidate;
     } else {
@@ -90,10 +94,14 @@ function split(text: string, budget: Budget, tokenizer: Tokenizer): string[] {
   return out;
 }
 
-function units(text: string): string[] {
-  return text
-    .split(/\n{2,}/)
-    .flatMap((paragraph) => paragraph.split(/(?<=[.!?…])\s+(?=\S)/))
-    .map((s) => s.trim())
-    .filter(Boolean);
+function units(text: string, byLine = false): string[] {
+  const sentences = (s: string) => s.split(/(?<=[.!?…])\s+(?=\S)/);
+  const parts = byLine
+    ? // Lines stay whole unless one is itself a paragraph's worth of text.
+      text.split('\n').flatMap((line) => (line.length > LONG_LINE_CHARS ? sentences(line) : [line]))
+    : text.split(/\n{2,}/).flatMap(sentences);
+  return parts.map((s) => s.trim()).filter(Boolean);
 }
+
+/** A line longer than this is prose wearing a line break and may be cut between sentences. */
+const LONG_LINE_CHARS = 4_000;

@@ -50,7 +50,8 @@ function scripted(document: Document): boolean {
  * trafilatura benchmark all win by combining a rule-based pass with
  * algorithmic fallbacks. Defuddle first; Readability if it came back empty.
  */
-export async function extract(html: string, url: string, options: ExtractOptions = {}): Promise<Extracted> {
+export async function extract(source: string, url: string, options: ExtractOptions = {}): Promise<Extracted> {
+  const html = ensureBody(source);
   const warnings: Warning[] = [];
   const dropped: Dropped[] = [];
 
@@ -79,9 +80,13 @@ export async function extract(html: string, url: string, options: ExtractOptions
     warnings.push({ code: 'fallback-extractor', detail: describe(error) });
   }
 
-  if (textLength(content) < MIN_CONTENT_CHARS) {
+  // Too little: nothing at all, or a sliver of a big document — Defuddle
+  // keeps one section of an RFC whose every paragraph ends in a pilcrow link.
+  const kept = textLength(content);
+  if (kept < MIN_CONTENT_CHARS || (bodyChars > BIG_BODY_CHARS && kept < bodyChars * MIN_KEPT_SHARE)) {
     const fallback = await quiet(() => new Readability(padInline(parseHTML(html).document) as never).parse());
-    if (fallback && textLength(fallback.content ?? '') >= textLength(content)) {
+    const got = textLength(fallback?.content ?? '');
+    if (fallback && got >= kept && (kept < MIN_CONTENT_CHARS || got >= kept * 2)) {
       if (content) warnings.push({ code: 'fallback-extractor', detail: 'readability' });
       content = fallback.content ?? '';
       title ??= fallback.title || undefined;
@@ -221,23 +226,69 @@ function textLength(fragment: string): number {
  * body. A Wikipedia stub has 400 characters of article inside 30 000 of
  * menus; judging "thin" against the menus would flag every short article.
  */
+/**
+ * Old RFCs start with `<pre>` and no `<html>` or `<body>`; the WHATWG specs
+ * omit the `<body>` start tag. The parser then leaves the text outside an
+ * empty body, and every extractor that starts from `document.body` finds
+ * nothing. Wrap such documents once, before anything reads them.
+ */
+function ensureBody(html: string): string {
+  if (/<body[\s>]/i.test(html)) return html;
+  // Done on the text, not the tree: the parser scatters a body-less document
+  // across the head, the root and the document itself.
+  const headMatch = /<head[\s>][\s\S]*?<\/head>/i.exec(html);
+  const head = headMatch ? headMatch[0] : '<head></head>';
+  let rest = headMatch ? html.slice(0, headMatch.index) + html.slice(headMatch.index + headMatch[0].length) : html;
+  rest = rest.replace(/<!doctype[^>]*>/i, '').replace(/<\/?html[^>]*>/gi, '');
+  return `<!DOCTYPE html><html>${head}<body>${rest}</body></html>`;
+}
+
+/** The element to measure: the body, or the whole tree when the body came out empty. */
+function pageRoot(document: Document): Element | undefined {
+  const body = document.body;
+  if (body && (body.textContent ?? '').trim()) return body;
+  return document.documentElement ?? body ?? undefined;
+}
+
+/**
+ * The main region: the largest of the usual containers, and only when it
+ * holds a real share of the page. A `#content` that is a table of contents
+ * (RFC 9110) must not stand in for a 400 000-character document.
+ */
+function mainRegion(root: Element): Element {
+  let best: Element | undefined;
+  let bestLen = 0;
+  for (const el of Array.from(root.querySelectorAll('main, [role="main"], #content, #main, article'))) {
+    const len = (el.textContent ?? '').trim().length;
+    if (len > bestLen) {
+      best = el;
+      bestLen = len;
+    }
+  }
+  const rootLen = (root.textContent ?? '').trim().length;
+  return best && bestLen > 200 && bestLen >= rootLen * MAIN_REGION_MIN_SHARE ? best : root;
+}
+
+/** A container that holds less than this share of the page's text is not the main region. */
+const MAIN_REGION_MIN_SHARE = 0.3;
+/** A document this big that yields under MIN_KEPT_SHARE of itself was mis-extracted, not cleaned. */
+const BIG_BODY_CHARS = 20_000;
+const MIN_KEPT_SHARE = 0.2;
+
 /** The article region's visible text with chrome and hidden elements removed. */
 function readerText(document: Document): string {
-  const body = document.body?.cloneNode(true) as Element | undefined;
+  const body = pageRoot(document)?.cloneNode(true) as Element | undefined;
   if (!body) return '';
   for (const el of Array.from(body.querySelectorAll('script,style,noscript,template,svg,nav,header,footer,aside,dialog,[hidden],[aria-hidden="true"],[style*="display:none"],[style*="display: none"]'))) el.remove();
-  const main = body.querySelector('main, [role="main"], #content, #main, article');
-  const region = main && (main.textContent ?? '').trim().length > 200 ? main : body;
-  return (region.textContent ?? '').replace(/\s+/g, ' ');
+  return (mainRegion(body).textContent ?? '').replace(/\s+/g, ' ');
 }
 
 function visibleTextLength(document: Document): number {
   // Work on a copy: the original document still feeds the id index.
-  const body = document.body?.cloneNode(true) as Element | undefined;
+  const body = pageRoot(document)?.cloneNode(true) as Element | undefined;
   if (!body) return 0;
   for (const el of Array.from(body.querySelectorAll('script,style,noscript,template,svg,nav,header,footer,aside'))) el.remove();
-  const main = body.querySelector('main, [role="main"], #content, #main, article');
-  const region = main && (main.textContent ?? '').trim().length > 200 ? main : body;
+  const region = mainRegion(body);
   // Prose only: menus, navboxes and category rows are made of links, and a
   // stub article surrounded by them must not be judged against them.
   for (const a of Array.from(region.querySelectorAll('a'))) a.remove();
@@ -254,7 +305,7 @@ const ARTICLE_BODY =
  * empty for JavaScript to fill (ria.ru keeps 131 characters in it).
  */
 function looksClientRendered(document: Document): 'body' | 'container' | false {
-  const body = document.body;
+  const body = pageRoot(document);
   if (!body) return false;
   // Scripts may all sit in <head>; count the whole document.
   const scripts = document.querySelectorAll('script').length;

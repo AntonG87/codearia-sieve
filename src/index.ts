@@ -172,7 +172,9 @@ export async function sieve(input: Input, options: SieveOptions = {}): Promise<R
 }
 
 /** Above this size the raw token count is sampled, not counted in full. */
-const RAW_COUNT_FULL_LIMIT = 1_000_000;
+// Two megabytes tokenize in about a second; below that the count is exact,
+// so the state can never appear larger than the page it came from.
+const RAW_COUNT_FULL_LIMIT = 2_000_000;
 const RAW_SAMPLES = 8;
 const RAW_SAMPLE_CHARS = 64_000;
 
