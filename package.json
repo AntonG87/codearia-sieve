@@ -1,0 +1,72 @@
+{
+  "name": "codearia-sieve",
+  "version": "0.1.0",
+  "description": "Turns web pages into decision-ready state: dates as dates, numbers computed, chunks sized for models that classify instead of write.",
+  "keywords": [
+    "llm",
+    "agents",
+    "mcp",
+    "scraping",
+    "markdown",
+    "context"
+  ],
+  "homepage": "https://github.com/AntonG87/codearia-sieve#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntonG87/codearia-sieve.git"
+  },
+  "bugs": "https://github.com/AntonG87/codearia-sieve/issues",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp/server.d.ts",
+      "default": "./dist/mcp/server.js"
+    }
+  },
+  "bin": {
+    "codearia-sieve": "./dist/mcp/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types \"test/*.test.ts\"",
+    "demo": "node --experimental-strip-types scripts/demo.ts",
+    "bench": "node --experimental-strip-types bench/run.ts",
+    "bench:fetch": "node --experimental-strip-types bench/fetch.ts",
+    "analytics": "node --experimental-strip-types bench/analytics.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@mozilla/readability": "^0.6.0",
+    "defuddle": "^0.19.4",
+    "gpt-tokenizer": "^4.0.0",
+    "linkedom": "^0.18.13",
+    "robots-parser": "^3.0.1",
+    "turndown": "^7.2.4",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/turndown": "^5.0.5",
+    "typescript": "^5.6.0"
+  }
+}

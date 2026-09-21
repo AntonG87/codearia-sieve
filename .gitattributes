@@ -1,0 +1,2 @@
+# Keep line endings stable across contributors; the tests compare output byte for byte.
+* text=auto eol=lf

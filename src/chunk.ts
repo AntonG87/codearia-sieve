@@ -1,0 +1,99 @@
+import type { Block, Budget, Chunk, Tokenizer, Warning } from './types.ts';
+
+export interface Chunked {
+  chunks: Chunk[];
+  warnings: Warning[];
+}
+
+/**
+ * Packs blocks into chunks that fit the budget in both tokens and characters.
+ *
+ * Greedy and in document order: a chunk closes when the next block would push
+ * it over either limit. A single block that is too large on its own is split
+ * on paragraph, then sentence, boundaries, and the split is reported as a
+ * warning because it is the one place where a chunk can stop mid-thought.
+ */
+export function chunk(blocks: Block[], budget: Budget, tokenizer: Tokenizer): Chunked {
+  const warnings: Warning[] = [];
+  const chunks: Chunk[] = [];
+
+  let text = '';
+  let tokens = 0;
+  let ids: string[] = [];
+  let anchor: string | undefined;
+
+  const close = () => {
+    if (!text) return;
+    const done: Chunk = {
+      id: `c${chunks.length + 1}`,
+      text,
+      tokens,
+      chars: text.length,
+      blocks: ids,
+    };
+    if (anchor) done.anchor = anchor;
+    chunks.push(done);
+    text = '';
+    tokens = 0;
+    ids = [];
+    anchor = undefined;
+  };
+
+  const add = (piece: string, pieceTokens: number, block: Block) => {
+    const joined = text ? `${text}\n\n${piece}` : piece;
+    const fits = tokens + pieceTokens <= budget.maxTokens && joined.length <= budget.maxChars;
+    if (!fits) close();
+    text = text ? `${text}\n\n${piece}` : piece;
+    tokens += pieceTokens;
+    if (!ids.includes(block.id)) ids.push(block.id);
+    anchor ??= block.anchor;
+  };
+
+  for (const block of blocks) {
+    const own = tokenizer.count(block.text);
+    if (own <= budget.maxTokens && block.text.length <= budget.maxChars) {
+      add(block.text, own, block);
+      continue;
+    }
+    warnings.push({ code: 'block-split', detail: `${block.id} (${own} tokens)` });
+    for (const piece of split(block.text, budget, tokenizer)) {
+      add(piece, tokenizer.count(piece), block);
+    }
+  }
+  close();
+
+  return { chunks, warnings };
+}
+
+/** Splits oversized text on paragraphs, then sentences, never mid-word. */
+function split(text: string, budget: Budget, tokenizer: Tokenizer): string[] {
+  const fits = (s: string) => tokenizer.count(s) <= budget.maxTokens && s.length <= budget.maxChars;
+  const out: string[] = [];
+  let buffer = '';
+
+  const flush = () => {
+    if (buffer) out.push(buffer);
+    buffer = '';
+  };
+
+  for (const unit of units(text)) {
+    const candidate = buffer ? `${buffer} ${unit}` : unit;
+    if (fits(candidate)) {
+      buffer = candidate;
+    } else {
+      flush();
+      // A single sentence over budget is pathological; hard-cut it rather than loop.
+      buffer = fits(unit) ? unit : unit.slice(0, budget.maxChars);
+    }
+  }
+  flush();
+  return out;
+}
+
+function units(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .flatMap((paragraph) => paragraph.split(/(?<=[.!?…])\s+(?=\S)/))
+    .map((s) => s.trim())
+    .filter(Boolean);
+}

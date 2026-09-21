@@ -1,0 +1,168 @@
+feed https://feeds.bbci.co.uk/news/rss.xml → 3 items
+feed https://feeds.arstechnica.com/arstechnica/index → 2 items
+feed https://www.theguardian.com/world/rss → 2 items
+feed https://lenta.ru/rss → 3 items
+feed https://ria.ru/export/rss2/archive/index.xml → 2 items
+feed https://www.ynet.co.il/Integration/StoryRss2.xml → 2 items
+feed https://www.spiegel.de/schlagzeilen/index.rss → 2 items
+feed https://www.lemonde.fr/rss/une.xml → 2 items
+feed https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada → 2 items
+random de failed: Unexpected token 'Y', "You are ma"... is not valid JSON
+
+56 pages to run
+
+ok  1/56 news-en     146 460 →   1 139  99%  date   1f  1011ms    https://www.bbc.co.uk/news/articles/cqp80p78mxx5o?at_medium=
+ok  2/56 news-en     151 381 →   1 438  99%  date   0f   571ms    https://www.bbc.co.uk/news/articles/cw4gm7l742dmo?at_medium=
+ok  3/56 news-en     144 185 →   1 403  99%  date   2f   523ms    https://www.bbc.co.uk/news/articles/cqzrz0z4plk1o?at_medium=
+xx  4/56 news-en         820 →       2 100%         0f  1108ms  blocked  https://arstechnica.com/gadgets/2026/09/apple-m6-mac-mini-re
+xx  5/56 news-en         828 →       2 100%         0f   336ms  blocked  https://arstechnica.com/gadgets/2026/09/googlebook-laptops-l
+ok  6/56 news-en     148 909 →   5 355  96%  date  10f   974ms    https://www.theguardian.com/us-news/ng-interactive/2026/sep/
+ok  7/56 news-en     111 273 →   1 517  99%  date   3f   477ms    https://www.theguardian.com/us-news/2026/sep/18/us-men-depor
+ok  8/56 news-ru      17 155 →     274  98%  date   0f   888ms  thin-content  https://lenta.ru/news/2026/09/21/brazilskaya-legenda-tsska-z
+ok  9/56 news-ru      15 907 →     263  98%  date   0f   810ms    https://lenta.ru/news/2026/09/21/evropeyskie-lidery-zahoteli
+ok 10/56 news-ru      17 144 →     502  97%  date   0f   728ms    https://lenta.ru/news/2026/09/21/es-priblizilsya-k-snyatiyu-
+ok 11/56 news-ru      43 638 →     237  99%  date   3f  2090ms  fallback-extractor,thin-content  https://ria.ru/20260921/vybory-2119341298.html
+ok 12/56 news-ru      44 137 →     286  99%  date   6f  1789ms  fallback-extractor,thin-content  https://ria.ru/20260921/er--2119341091.html
+ok 13/56 news-he      43 855 →   1 008  98%  date   0f   819ms    https://www.ynet.co.il/news/article/hkmixl6kme
+ok 14/56 news-he      35 625 →     225  99%  date   0f   569ms  thin-content  https://www.ynet.co.il/news/article/ryddbiatfx
+ok 15/56 news-de     238 194 →     115 100%  date   0f  1539ms  paywall  https://www.spiegel.de/wirtschaft/soziales/berlin-wahl-wie-d
+ok 16/56 news-de     237 973 →     942 100%  date   0f   747ms    https://www.spiegel.de/kultur/kino/sylvester-stallone-lehnte
+ok 17/56 news-fr     135 052 →   1 025  99%  date   5f  1220ms  paywall  https://www.lemonde.fr/international/article/2026/09/21/frie
+ok 18/56 news-fr     130 804 →     424 100%  date   1f   872ms  paywall  https://www.lemonde.fr/election-presidentielle-2027/article/
+ok 19/56 news-es     151 343 →   1 823  99%  date   0f  1117ms    https://elpais.com/espana/2026-09-21/el-juez-peinado-abre-ju
+ok 20/56 news-es     149 808 →   1 112  99%  date   1f  1046ms    https://elpais.com/espana/2026-09-21/el-gobierno-condena-la-
+ok 21/56 wiki-en      34 116 →     234  99%  date   0f  1743ms  thin-content  https://en.wikipedia.org/wiki/L%C3%BCbben_(Spreewald)_statio
+ok 22/56 wiki-en      25 582 →     235  99%  date   0f  1136ms  thin-content  https://en.wikipedia.org/wiki/Lightning_Triggers
+ok 23/56 wiki-en      28 622 →   2 183  92%  date   0f   517ms    https://en.wikipedia.org/wiki/Last_Seen_in_Massilia
+ok 24/56 wiki-ru      38 902 →     668  98%  date   0f  2487ms    https://ru.wikipedia.org/wiki/%D0%9D%D0%BE%D1%80%D1%82%D1%83
+ok 25/56 wiki-ru      73 709 →     827  99%  date   2f   763ms  thin-content  https://ru.wikipedia.org/wiki/%D0%A1%D0%B5%D0%BD-%D0%96%D0%B
+ok 26/56 wiki-fr      31 879 →     962  97%  date   1f  1856ms    https://fr.wikipedia.org/wiki/Maison_de_Saint-Vincent-de-Pau
+ok 27/56 wiki-ja     110 513 →  24 465  78%  date   2f  2812ms    https://ja.wikipedia.org/wiki/%E7%94%B0%E4%BB%A3%E5%B3%B6
+ok 28/56 wiki-he      63 300 →   3 286  95%  date   1f  1717ms    https://he.wikipedia.org/wiki/%D7%94%D7%A8%D7%A6%D7%97_(%D7%
+ok 29/56 docs         90 993 →     748  99%  date   0f  1273ms    https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_la
+ok 30/56 docs          6 941 →     459  93%         0f   551ms    https://docs.python.org/3/library/asyncio.html
+ok 31/56 docs         17 490 →   5 493  69%         0f   450ms    https://doc.rust-lang.org/book/ch04-01-what-is-ownership.htm
+ok 32/56 docs        132 588 →   1 809  99%         0f  2200ms    https://kubernetes.io/docs/concepts/overview/
+ok 33/56 docs         30 324 →  12 908  57%  date   1f  1231ms    https://www.postgresql.org/docs/current/sql-select.html
+ok 34/56 docs        508 797 →  80 433  84%         0f  3450ms    https://www.rfc-editor.org/rfc/rfc2616
+ok 35/56 blog         21 839 →   7 748  65%         0f  1295ms    https://martinfowler.com/articles/microservices.html
+ok 36/56 blog         20 399 →   4 304  79%  date  20f  2220ms    https://www.joelonsoftware.com/2000/08/09/the-joel-test-12-s
+ok 37/56 blog         10 043 →   2 439  76%         0f   809ms    https://go.dev/blog/slices-intro
+ok 38/56 blog          9 981 →   5 009  50%         6f  1099ms    https://www.paulgraham.com/ds.html
+xx 39/56 science       1 431 →       8  99%         0f   416ms  blocked  https://pubmed.ncbi.nlm.nih.gov/33301246/
+ok 40/56 science      14 358 →     720  95%         3f   603ms    https://arxiv.org/abs/2005.14165
+xx 41/56 health          184 →      86  53%         0f   537ms  blocked,fallback-extractor  https://www.mayoclinic.org/diseases-conditions/diabetes/symp
+ok 42/56 health       16 103 →   1 941  88%  date   4f   611ms    https://www.nhs.uk/conditions/asthma/
+ok 43/56 gov           9 657 →     176  98%         0f  3824ms    https://www.usa.gov/passport
+ok 44/56 gov          23 237 →     237  99%  date   2f   688ms  thin-content  https://www.gov.uk/renew-adult-passport
+ok 45/56 gov          20 175 →   5 781  71%         8f  1254ms    https://www.law.cornell.edu/uscode/text/17/107
+ok 46/56 reference   322 096 →  32 084  90%  date 147f  4276ms    https://en.wikivoyage.org/wiki/Paris
+ok 47/56 reference   201 293 →   2 614  99%  date   1f  4672ms    https://www.wikihow.com/Tie-a-Tie
+ok 48/56 reference   204 222 → 158 282  22%         0f  4309ms    https://www.gutenberg.org/files/1342/1342-h/1342-h.htm
+ok 49/56 recipe      212 583 →   1 391  99%  date  12f  1909ms    https://www.allrecipes.com/recipe/10813/best-chocolate-chip-
+ok 50/56 recipe      170 219 →   1 100  99%  date   5f  1784ms    https://www.bbcgoodfood.com/recipes/best-ever-chocolate-brow
+ok 51/56 forum         2 256 →      54  98%         0f  1343ms    https://news.ycombinator.com/item?id=1
+xx 52/56 forum             0 →       0   0%         0f   392ms  robots-disallowed  https://lobste.rs/
+ok 53/56 commerce    148 895 →   1 530  99%         4f  1636ms    https://www.apple.com/macbook-air/
+xx 54/56 commerce          0 →       0   0%         0f   205ms  robots-disallowed  https://www.imdb.com/title/tt0111161/
+ok 55/56 listing     140 278 →     366 100%         0f   884ms    https://www.anthropic.com/news
+ok 56/56 listing      75 003 →     853  99%         1f   895ms    https://www.espn.com/
+
+# Analytics run — 2026-09-21
+
+Pages attempted: 56. Usable (200, content, no blocking warning): 50 (89.3%).
+
+## Token saving (usable pages)
+
+| Statistic | Value |
+|---|---|
+| Mean saving | 91.3% |
+| Median saving | 98.5% |
+| Raw tokens, total | 4 779 236 |
+| State tokens, total | 380 427 |
+| Raw tokens, median page | 53 718,5 |
+| State tokens, median page | 1 106 |
+| Time, median | 1 126,5 ms |
+| Time, p90 | 3 450 ms |
+
+Distribution of saving:
+
+- ≥ 99%: 17
+- 95–99%: 17
+- 90–95%: 5
+- 80–90%: 2
+- < 80%: 9
+
+## What the state contains
+
+| Statistic | Value |
+|---|---|
+| Publication date found | 35 / 50 (70.0%) |
+| Date sources | json-ld: 31, time: 1, —: 15, meta: 3 |
+| Facts per page, mean | 5.0 |
+| Pages with ≥ 1 fact | 26 / 50 |
+| Chunks per page, mean | 1.50 |
+| Chunks anchored to a real #id | 27 / 75 |
+| Languages seen | en-GB, en, ru, he, de, fr, es, ja, en-US |
+
+## By category
+
+| Category | Pages | Usable | Mean saving | Date found | Facts/page |
+|---|---|---|---|---|---|
+| news-en | 7 | 5 | 98.5% | 5/5 | 3.2 |
+| news-ru | 5 | 5 | 98.5% | 5/5 | 1.8 |
+| news-he | 2 | 2 | 98.5% | 2/2 | 0.0 |
+| news-de | 2 | 2 | 99.8% | 2/2 | 0.0 |
+| news-fr | 2 | 2 | 99.5% | 2/2 | 3.0 |
+| news-es | 2 | 2 | 99.0% | 2/2 | 0.5 |
+| wiki-en | 3 | 3 | 96.9% | 3/3 | 0.0 |
+| wiki-ru | 2 | 2 | 98.6% | 2/2 | 1.0 |
+| wiki-fr | 1 | 1 | 97.0% | 1/1 | 1.0 |
+| wiki-ja | 1 | 1 | 77.9% | 1/1 | 2.0 |
+| wiki-he | 1 | 1 | 94.8% | 1/1 | 1.0 |
+| docs | 6 | 6 | 83.6% | 2/6 | 0.2 |
+| blog | 4 | 4 | 67.2% | 1/4 | 6.5 |
+| science | 2 | 1 | 95.0% | 0/1 | 3.0 |
+| health | 2 | 1 | 87.9% | 1/1 | 4.0 |
+| gov | 3 | 3 | 89.5% | 1/3 | 3.3 |
+| reference | 3 | 3 | 70.4% | 2/3 | 49.3 |
+| recipe | 2 | 2 | 99.3% | 2/2 | 8.5 |
+| forum | 2 | 1 | 97.6% | 0/1 | 0.0 |
+| commerce | 2 | 1 | 99.0% | 0/1 | 4.0 |
+| listing | 2 | 2 | 99.3% | 0/2 | 0.5 |
+
+## Warnings across all pages
+
+- `thin-content`: 8
+- `blocked`: 4
+- `fallback-extractor`: 3
+- `paywall`: 3
+- `robots-disallowed`: 2
+
+## Pages that were not usable
+
+- https://arstechnica.com/gadgets/2026/09/apple-m6-mac-mini-review-300-price-hike-spoils-a-nice-upgrade/ — status 405, blocked
+- https://arstechnica.com/gadgets/2026/09/googlebook-laptops-launch-october-4-starting-at-899-preorders-for-five-models-live-today/ — status 405, blocked
+- https://pubmed.ncbi.nlm.nih.gov/33301246/ — status 203, blocked
+- https://www.mayoclinic.org/diseases-conditions/diabetes/symptoms-causes/syc-20371444 — status 403, blocked, fallback-extractor
+- https://lobste.rs/ — status 0, robots-disallowed
+- https://www.imdb.com/title/tt0111161/ — status 0, robots-disallowed
+
+## Anomalies to look at
+
+- https://lenta.ru/news/2026/09/21/brazilskaya-legenda-tsska-zagovoril-na-russkom/ — kept 29.0% of visible text, chunks 1, thin-content
+- https://ria.ru/20260921/vybory-2119341298.html — kept 12.9% of visible text, chunks 1, fallback-extractor, thin-content
+- https://ria.ru/20260921/er--2119341091.html — kept 13.6% of visible text, chunks 1, fallback-extractor, thin-content
+- https://www.spiegel.de/wirtschaft/soziales/berlin-wahl-wie-die-linke-enteignunge — kept 9.6% of visible text, chunks 1, paywall
+- https://www.lemonde.fr/international/article/2026/09/21/friedrich-merz-tres-frag — kept 26.4% of visible text, chunks 1, paywall
+- https://www.lemonde.fr/election-presidentielle-2027/article/2026/09/21/president — kept 14.0% of visible text, chunks 1, paywall
+- https://en.wikipedia.org/wiki/L%C3%BCbben_(Spreewald)_station — kept 17.1% of visible text, chunks 1, thin-content
+- https://en.wikipedia.org/wiki/Lightning_Triggers — kept 22.0% of visible text, chunks 1, thin-content
+- https://ru.wikipedia.org/wiki/%D0%A1%D0%B5%D0%BD-%D0%96%D0%B0%D0%BD-%D0%BB%D0%B5 — kept 22.1% of visible text, chunks 1, thin-content
+- https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Grid_layout — kept 14.8% of visible text, chunks 1
+- https://kubernetes.io/docs/concepts/overview/ — kept 28.4% of visible text, chunks 1
+- https://www.rfc-editor.org/info/rfc2616/ — kept 98.1% of visible text, chunks 8
+- https://www.gov.uk/renew-adult-passport — kept 25.3% of visible text, chunks 1, thin-content
+- https://www.gutenberg.org/files/1342/1342-h/1342-h.htm — kept 100.2% of visible text, chunks 15
+- https://www.apple.com/macbook-air/ — kept 17.0% of visible text, chunks 1
+

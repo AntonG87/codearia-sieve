@@ -1,0 +1,59 @@
+# category <TAB> url
+# "rss:<feed>" takes the first N items of a feed, so part of the sample is
+# whatever the news was on the day of the run. "Special:Random" is random by
+# construction. Final URLs are recorded in the results.
+
+news-en	rss:https://feeds.bbci.co.uk/news/rss.xml	3
+news-en	rss:https://feeds.arstechnica.com/arstechnica/index	2
+news-en	rss:https://www.theguardian.com/world/rss	2
+news-ru	rss:https://lenta.ru/rss	3
+news-ru	rss:https://ria.ru/export/rss2/archive/index.xml	2
+news-he	rss:https://www.ynet.co.il/Integration/StoryRss2.xml	2
+news-de	rss:https://www.spiegel.de/schlagzeilen/index.rss	2
+news-fr	rss:https://www.lemonde.fr/rss/une.xml	2
+news-es	rss:https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada	2
+
+wiki-en	random-wiki:en	3
+wiki-ru	random-wiki:ru	2
+wiki-de	random-wiki:de	1
+wiki-fr	random-wiki:fr	1
+wiki-ja	random-wiki:ja	1
+wiki-he	random-wiki:he	1
+
+docs	https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout
+docs	https://docs.python.org/3/library/asyncio.html
+docs	https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html
+docs	https://kubernetes.io/docs/concepts/overview/
+docs	https://www.postgresql.org/docs/current/sql-select.html
+docs	https://www.rfc-editor.org/rfc/rfc2616
+
+blog	https://martinfowler.com/articles/microservices.html
+blog	https://www.joelonsoftware.com/2000/08/09/the-joel-test-12-steps-to-better-code/
+blog	https://go.dev/blog/slices-intro
+blog	https://www.paulgraham.com/ds.html
+
+science	https://pubmed.ncbi.nlm.nih.gov/33301246/
+science	https://arxiv.org/abs/2005.14165
+
+health	https://www.mayoclinic.org/diseases-conditions/diabetes/symptoms-causes/syc-20371444
+health	https://www.nhs.uk/conditions/asthma/
+
+gov	https://www.usa.gov/passport
+gov	https://www.gov.uk/renew-adult-passport
+gov	https://www.law.cornell.edu/uscode/text/17/107
+
+reference	https://en.wikivoyage.org/wiki/Paris
+reference	https://www.wikihow.com/Tie-a-Tie
+reference	https://www.gutenberg.org/files/1342/1342-h/1342-h.htm
+
+recipe	https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/
+recipe	https://www.bbcgoodfood.com/recipes/best-ever-chocolate-brownies-recipe
+
+forum	https://news.ycombinator.com/item?id=1
+forum	https://lobste.rs/
+
+commerce	https://www.apple.com/macbook-air/
+commerce	https://www.imdb.com/title/tt0111161/
+
+listing	https://www.anthropic.com/news
+listing	https://www.espn.com/

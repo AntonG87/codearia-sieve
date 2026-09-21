@@ -1,0 +1,26 @@
+# One URL per line. Pages are downloaded into bench/pages/ (git-ignored):
+# third-party HTML stays on your machine, only this list is shared.
+# Mixed on purpose: docs, encyclopedias, news fronts, pricing, product,
+# blogs, listings; English, Russian, Hebrew; a few that are known to be
+# client-rendered or closed to bots, so the warnings get exercised too.
+
+https://developer.mozilla.org/en-US/docs/Web/API/fetch
+https://docs.python.org/3/tutorial/introduction.html
+https://react.dev/learn
+https://nodejs.org/en/blog/release/v22.14.0
+https://trafilatura.readthedocs.io/en/latest/
+https://en.wikipedia.org/wiki/Web_scraping
+https://ru.wikipedia.org/wiki/%D0%9F%D0%B0%D1%80%D1%81%D0%B8%D0%BD%D0%B3
+https://github.com/kepano/defuddle
+https://www.npmjs.com/package/linkedom
+https://academy.codearia.com/
+https://vercel.com/pricing
+https://stripe.com/pricing
+https://www.apple.com/iphone/
+https://www.bbc.com/news
+https://lenta.ru/
+https://www.ynet.co.il/
+https://habr.com/ru/articles/
+https://blog.cloudflare.com/
+https://www.reddit.com/r/programming/
+https://medium.com/

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Jev pricing and limits — Example Docs</title>
+  <meta property="og:title" content="Jev pricing and limits">
+  <meta property="article:published_time" content="2026-09-15T09:00:00Z">
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Article","headline":"Jev pricing and limits","datePublished":"2026-09-15","dateModified":"2026-09-17"}
+  </script>
+  <style>.promo{color:red}</style>
+</head>
+<body>
+  <header>
+    <nav><a href="/">Home</a> <a href="/docs">Docs</a> <a href="/pricing">Pricing</a> <a href="/login">Sign in</a></nav>
+  </header>
+  <div class="cookie-banner">We use cookies to improve your experience. <button>Accept all</button></div>
+
+  <main>
+    <article>
+      <h1 id="top">Jev pricing and limits</h1>
+      <p class="byline">Published September 15, 2026 · Updated September 17, 2026</p>
+
+      <h2 id="pricing">Pricing</h2>
+      <p>Jev is charged per input token. Output tokens are free. The current rate is $0.042 per million input tokens, which works out to $42 per billion.</p>
+      <p>There is no minimum commitment and no monthly fee. You pay for what you send.</p>
+
+      <h2 id="limits">Limits</h2>
+      <p>Every request is bounded by two budgets. The state plus the longest single question must stay under 32,000 tokens, and the state plus all questions together must stay under 64,000 tokens.</p>
+      <ul>
+        <li>250,000 tokens per second</li>
+        <li>1,200 requests per minute</li>
+        <li>Text input only</li>
+      </ul>
+
+      <h2 id="notes">Notes on accuracy</h2>
+      <p>Accuracy degrades as irrelevant material fills the state. Keep the state to what the questions need.</p>
+      <blockquote>Jev reads dates as text, not as ordered values. Normalize them before asking.</blockquote>
+      <table>
+        <tr><th>Tier</th><th>Rate</th><th>Notes</th></tr>
+        <tr><td>Standard</td><td>$0.042 / M</td><td>default</td></tr>
+        <tr><td>Batch</td><td>$0.021 / M</td><td>24h turnaround</td></tr>
+      </table>
+      <pre><code>curl -X POST https://api.example/v1/judge -d '{"state":"…","questions":[]}'</code></pre>
+    </article>
+
+    <aside class="related">
+      <h3>Read next</h3>
+      <ul><li><a href="/a">Ten tips for prompts</a></li><li><a href="/b">Why we built Jev</a></li></ul>
+    </aside>
+  </main>
+
+  <footer>
+    <p>© 2026 Example Inc. All rights reserved. <a href="/privacy">Privacy</a> <a href="/terms">Terms</a></p>
+    <div class="social">Follow us on X · LinkedIn · YouTube</div>
+  </footer>
+  <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}</script>
+</body>
+</html>

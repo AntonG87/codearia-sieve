@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Secrets: the vendor key never belongs in the repository
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+.next/
+
+# Local scratch: saved pages used to check the cleaning step. Third-party HTML
+# stays on the machine that downloaded it; bench/pages.txt is what gets shared.
+fixtures/pages/
+bench/pages/
+*.local.*
+
+# OS
+.DS_Store
+Thumbs.db
