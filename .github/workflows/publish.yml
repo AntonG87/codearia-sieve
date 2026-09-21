@@ -25,4 +25,13 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: npm publish --provenance --access public
+      # A tag that moves (history rewrite) must not fail on a version that is
+      # already in the registry.
+      - id: version
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if npm view "codearia-sieve@$V" version >/dev/null 2>&1; then
+            echo "already published $V"; echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.version.outputs.skip != 'true'
+        run: npm publish --provenance --access public
