@@ -15,7 +15,7 @@
   <a href="#use-it-as-a-library"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-library-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
   <a href="https://www.npmjs.com/package/codearia-sieve"><img alt="npm" src="https://img.shields.io/npm/v/codearia-sieve?style=flat-square&color=F5EFE6&labelColor=0a0a0a"></a>
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-50%20passing%2C%20offline-F5EFE6?style=flat-square&labelColor=0a0a0a">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-71%20passing%2C%20offline-F5EFE6?style=flat-square&labelColor=0a0a0a">
   <img alt="No model, no key" src="https://img.shields.io/badge/runs%20without-a%20model%20or%20an%20API%20key-F5EFE6?style=flat-square&labelColor=0a0a0a">
 </p>
 
@@ -219,7 +219,7 @@ await sieve(input, {
 
 ```sh
 npm install
-npm test                    # 50 tests, offline, about a second
+npm test                    # 71 tests, offline, a few seconds
 npm run demo -- <url>       # the token bill for one page
 npm run bench               # the 20-page benchmark set
 npm run analytics           # the 56-page random sample: rows, CSV, summary
