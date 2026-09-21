@@ -1,0 +1,29 @@
+== sieve_page ==
+uplift         117973 →     7 http-error|fallb h1: -                                  prices:                          Office Furniture that Benefits You      
+flexispot       41281 →    37 http-error|empty h1: -                                  prices:                          Product details                         
+ikea           336035 →    66 empty-without-js h1: -                                  prices:                          Products                                
+autonomous     154983 →  2312 -                h1: -                                  prices: 435 426 422 417 449 400  Best Standing Desk for Home and Office  
+hermanmiller    30665 →   248 http-error       h1: -                                  prices:                          404                                     
+secretlab      806659 →   186 thin-content     h1: -                                  prices:                          Secretlab MAGNUS Pro                    
+branch         525426 →  1067 -                h1: -                                  prices: 749 749 549 949 299 799  Tria Standing Desk                      
+vari           116162 →   174 http-error       h1: -                                  prices:                          404 Error: Page Not Found               
+desky          183961 →    99 http-error|empty h1: -                                  prices:                          404 Not Found                           
+ergonofis      312606 →  2183 -                h1: -                                  prices: 2295                     Sway Standing Desk                      
+
+== jev_rerank: who answers the query ==
+   0.91 autonomous   
+   0.47 branch       
+   0.40 ergonofis    
+   0.36 vari         
+   0.05 hermanmiller 
+   0.03 secretlab    
+
+== jev_extract: price and warranty, verbatim ==
+  autonomous    price $449       auto       warranty 10-year    auto       | sieve prices: 435 426 422 417 449 400
+  hermanmiller  price -          not_found  warranty -          not_found  | sieve prices: -
+  secretlab     price -          not_found  warranty -          not_found  | sieve prices: -
+  branch        price $749       auto       warranty -          review     | sieve prices: 749 749 549 949 299 799
+  vari          price -          not_found  warranty -          not_found  | sieve prices: -
+  ergonofis     price $2,295.00  auto       warranty 10-year    auto       | sieve prices: 2295
+
+6/10 usable; raw 2625751 → state 6379 tokens

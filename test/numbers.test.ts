@@ -137,3 +137,13 @@ test('Hebrew and Arabic currencies, scales and units become facts', () => {
   const ar = extractFacts([block('بلغت قيمة الصفقة 500 مليون دولار، وارتفعت الأسعار 12 بالمئة خلال 3 أيام.')], 'ar');
   assert.deepEqual(ar.map((f) => [f.value, f.unit]), [[5e8, 'USD'], [12, '%'], [3, 'day']]);
 });
+
+// Lab 4 follow-ups: Eastern Arabic digits, and "ago" timestamps in bylines.
+test('Eastern Arabic digits are read, and "ago" durations are not facts', () => {
+  const ar = extractFacts([block('بلغت التكلفة ٢٥٠ مليون دولار. نُشر قبل 3 ساعات.')], 'ar');
+  assert.deepEqual(ar.map((f) => [f.value, f.unit]), [[2.5e8, 'USD']]);
+  const en = extractFacts([block('Posted 2 hours ago. The build took 45 minutes.')], 'en');
+  assert.deepEqual(en.map((f) => [f.value, f.unit]), [[45, 'min']]);
+  const he = extractFacts([block('לפני 5 דקות. הנסיעה ארכה 40 דקות.')], 'he');
+  assert.deepEqual(he.map((f) => [f.value, f.unit]), [[40, 'min']]);
+});

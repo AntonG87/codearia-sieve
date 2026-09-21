@@ -93,6 +93,11 @@ const CURRENCY_WORDS: [RegExp, string][] = [
 // prefix to a number with a hyphen ("ב-3,000" is "in 3,000", not minus).
 const NUMBER = /(?<![\p{L}\p{N}.,])([-+]?)(\d(?:[\d ,. ]*\d)?)(?![\d])/gu;
 
+/** Durations that read as timestamps when wrapped in "ago" words. */
+const DURATIONS = new Set(['s', 'min', 'h', 'day']);
+const AGO_AFTER = /^(?:ago|назад|temu|fa)(?!\p{L})/iu;
+const AGO_BEFORE = /(?:לפני|قبل|منذ|il y a|hace|vor|před|назад)\s*$/iu;
+
 /** A lower bound written right before the number: "3–329 секунд", "70-500 ms". */
 const RANGE_LOW = /(\d+(?:[.,]\d+)?)\s*[–—-]\s*$/;
 
@@ -183,7 +188,9 @@ interface Hit {
   context: string;
 }
 
-function scan(text: string, locale: NumberLocale, inTable = false): Hit[] {
+function scan(source: string, locale: NumberLocale, inTable = false): Hit[] {
+  // Eastern Arabic and Persian digits are digits; same length, so offsets hold.
+  const text = source.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6f0));
   const hits: Hit[] = [];
   NUMBER.lastIndex = 0;
   let m: RegExpExecArray | null;
@@ -248,6 +255,8 @@ function scan(text: string, locale: NumberLocale, inTable = false): Hit[] {
 
     // Without a unit the number is not a fact. Years never are.
     if (!unit) continue;
+    // "3 hours ago" / "قبل 3 ساعات" / "לפני 5 דקות" is a timestamp, not a measurement.
+    if (DURATIONS.has(unit) && (AGO_AFTER.test(after) || AGO_BEFORE.test(before))) continue;
 
     for (const [re, rate] of RATES) {
       if (re.test(after)) {

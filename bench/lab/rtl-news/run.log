@@ -1,0 +1,56 @@
+== sieve_page ==
+ynet.co.il        39785 →  1018 he    2026-09-21 json-ld rtl 100% facts  2 -                קטאר: "אם הסיוע שהעברנו לעזה הגיע לחמאס 
+ynet.co.il        39644 →   732 he    2026-09-21 json-ld rtl 100% facts  0 -                במהלך יום כיפור: נעצרו שני מחבלים שתכננו
+ynet.co.il        38348 →   792 he    2026-09-21 json-ld rtl 100% facts  0 -                במהלך כיפור: שני הרוגים בתאונות דרכים, ג
+ynet.co.il        46404 →  2426 he    2026-09-21 json-ld rtl 100% facts  1 -                האם רוסיה באמת תתקוף את נאט"ו? כך הגיבו 
+haaretz.co.il    405420 →   238 he    2026-09-21 json-ld rtl 100% facts  0 paywall          מפלגתו של מרץ הפסידה בשתי מדינות מחוז בג
+haaretz.co.il    402923 →   175 he    2026-09-21 json-ld rtl 100% facts  0 empty-without-js אדם פתח בירי מחוץ לבית כנסת באונטריו שבק
+haaretz.co.il    451239 →   709 he    2026-09-21 json-ld rtl 100% facts  0 -                קטאר: אם סיוע שהעברנו לרצועה הגיע לידי ח
+haaretz.co.il    406329 →   300 he    2026-09-21 json-ld rtl 100% facts  0 paywall          ראשי מודיעין באירופה: ייתכן שרוסיה נערכת
+walla.co.il      150903 →   537 he    2026-09-21 json-ld rtl 100% facts  0 -                3 נהרגו ביום הכיפורים: 3,322 בני אדם נזק
+walla.co.il      160418 →  3953 he    2026-09-20 json-ld rtl 100% facts  0 -                הקיבוץ, הסידור ויום הדין: כשהשכול הישראל
+walla.co.il      152797 →   549 he    2026-09-20 json-ld rtl  99% facts  0 -                הסם הוסווה כנוזל למדפסות: המשלוח מתאילנד
+walla.co.il      153083 →  1887 he    2026-09-20 json-ld rtl 100% facts  0 -                "זהו זמן הכרעה: להפוך למעצמה אזורית או ל
+globes.co.il      23214 →   852 he    2026-09-21 json-ld rtl  99% facts 13 -                ביטקוין בשיא חדש, עליות בארה"ב; והאזהרה:
+globes.co.il      23316 →   384 he    2026-09-21 json-ld rtl 100% facts  0 -                למרות בקשת יורש העצר: טראמפ עצר מתקפה נג
+globes.co.il      23937 →  1081 he    2026-09-21 json-ld rtl 100% facts 13 -                מה קרה לריביות ומאיזה מסלול לווי המשכנתא
+globes.co.il      24774 →  1534 he    2026-09-21 json-ld rtl 100% facts 10 -                משפחות פשע ותומכי טרור פלסטיני בחגיגות ה
+aljazeera.net: feed failed TypeError: fetch failed
+aljazeera.net: no items
+bbc.com/arabic   142398 →  2204 ar    2026-09-21 json-ld rtl 100% facts  1 -                الولايات المتحدة تتوعد بإيقاف حركة الطير
+bbc.com/arabic   132713 →  1231 ar    2026-09-21 json-ld rtl 100% facts  1 -                دونالد ترامب: ثلاث مؤسسات إعلامية أمريكي
+bbc.com/arabic   141587 →  2527 ar    2026-09-21 json-ld rtl 100% facts  1 -                عمى الوجوه: لم أميّز وجه حبيبي.. وهكذا ا
+bbc.com/arabic   132510 →  1813 ar    2026-09-21 json-ld rtl 100% facts  1 -                سوريا: أربع إصابات "حصيلة أولية" لانفجار
+aawsat.com: no items
+
+== jev_classify: topic ==
+  ynet.co.il      politics  review  קטאר: "אם הסיוע שהעברנו לעזה הגיע לחמאס - ישראל אחראית לכך" 
+  ynet.co.il      security  auto    במהלך יום כיפור: נעצרו שני מחבלים שתכננו פיגוע מיידי        
+  ynet.co.il      society   auto    במהלך כיפור: שני הרוגים בתאונות דרכים, גופה אותרה באום אל פח
+  ynet.co.il      security  review  האם רוסיה באמת תתקוף את נאט"ו? כך הגיבו ראשי מודיעין באירופה
+  haaretz.co.il   politics  auto    קטאר: אם סיוע שהעברנו לרצועה הגיע לידי חמאס – ישראל אחראית ל
+  walla.co.il     society   auto    3 נהרגו ביום הכיפורים: 3,322 בני אדם נזקקו לטיפול רפואי     
+  walla.co.il     society   auto    הקיבוץ, הסידור ויום הדין: כשהשכול הישראלי חיבר בין חילונים ל
+  walla.co.il     society   review  הסם הוסווה כנוזל למדפסות: המשלוח מתאילנד שנחשף בנתב"ג       
+  walla.co.il     politics  auto    "זהו זמן הכרעה: להפוך למעצמה אזורית או לקרוס"               
+  globes.co.il    economy   auto    ביטקוין בשיא חדש, עליות בארה"ב; והאזהרה: מימוש חזק ומהיר בדר
+  globes.co.il    security  auto    למרות בקשת יורש העצר: טראמפ עצר מתקפה נגד החות'ים           
+  globes.co.il    economy   auto    מה קרה לריביות ומאיזה מסלול לווי המשכנתא  ממשיכים להתרחק?   
+  globes.co.il    politics  auto    משפחות פשע ותומכי טרור פלסטיני בחגיגות הניצחון של השמאל בברל
+  bbc.com/arabic  politics  review  الولايات المتحدة تتوعد بإيقاف حركة الطيران الإيراني يوم الأر
+  bbc.com/arabic  politics  auto    دونالد ترامب: ثلاث مؤسسات إعلامية أمريكية تعتزم مقاضاة إدارة
+  bbc.com/arabic  society   auto    عمى الوجوه: لم أميّز وجه حبيبي.. وهكذا اكتشفت إصابتي بالمرض 
+  bbc.com/arabic  security  auto    سوريا: أربع إصابات "حصيلة أولية" لانفجارات متتالية في موقع ع
+
+== facts sample ==
+  ynet.co.il      % %
+  ynet.co.il      %
+  globes.co.il    % USD % % % % % USD
+  globes.co.il    ILS ILS % % % % % %
+  globes.co.il    % % % % % % EUR %
+  bbc.com/arabic  h
+  bbc.com/arabic  h
+  bbc.com/arabic  h
+  bbc.com/arabic  h
+
+17/20 usable; dated 20/20; language detected 20; he 16, ar 4; topic auto 0.76; raw 3091742 → state 24942
