@@ -114,7 +114,7 @@ r.state.facts[0]      // { value: 42, unit: "USD_per_billion", label: "price_bto
                       //   context: "Price (per Btok / per Mtok) | jev-1.13.0: $42 / $0.042", from: "b3" }
 r.state.facts[1]      // { value: 0.042, unit: "USD_per_million", … }   — paired by position
 r.state.chunks[0]     // { id: "c1", tokens: 1210, chars: 5357, anchor: "Current models",
-                      //   blocks: ["b1", …, "b36"], text: "…" }
+                      //   headings: ["Current models", "Pricing", …], blocks: ["b1", …, "b36"], text: "…" }
 r.usage               // { rawTokens: 127413, stateTokens: 1211,
                       //   visibleChars: 4939, stateChars: 5357, chunks: 1, ms: 1503 }
 r.warnings            // []
@@ -156,7 +156,7 @@ You say what you want in plain words. The agent finds the pages, calls `sieve_pa
 
 **`sieve_page`** — `url` or `html`
 
-Returns typed `structuredContent` with an output schema: `source`, `state`, `usage`, `warnings`. In the default `summary` mode chunks carry sizes and anchors but **no text** — the agent sees what exists without paying for it. `mode: "full"` and `mode: "markdown"` when you want everything.
+Returns typed `structuredContent` with an output schema: `source`, `state`, `usage`, `warnings`. In the default `summary` mode chunks carry sizes, anchors and their headings but **no text** — the agent sees the outline of what exists without paying for it. `mode: "full"` and `mode: "markdown"` when you want everything.
 
 </td>
 <td width="50%" valign="top">

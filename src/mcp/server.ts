@@ -30,6 +30,8 @@ const ChunkSchema = z.object({
   tokens: z.number(),
   chars: z.number(),
   anchor: z.string().optional(),
+  /** The headings inside the chunk: its outline, available in every mode. */
+  headings: z.array(z.string()).optional(),
   blocks: z.array(z.string()),
 });
 const StateSchema = z.object({
@@ -93,6 +95,7 @@ export function present(result: Result, mode: (typeof MODES)[number]) {
   const chunks = result.state.chunks.map((c) => {
     const out: z.infer<typeof ChunkSchema> = { id: c.id, tokens: c.tokens, chars: c.chars, blocks: c.blocks };
     if (c.anchor) out.anchor = c.anchor;
+    if (c.headings) out.headings = c.headings;
     if (mode === 'full') out.text = c.text;
     return out;
   });

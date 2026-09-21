@@ -1,5 +1,8 @@
 import type { Block, Budget, Chunk, Tokenizer, Warning } from './types.ts';
 
+/** A heading arriving when the chunk is this full closes it, so sections start chunks. */
+const HEADING_CLOSE_SHARE = 0.5;
+
 export interface Chunked {
   chunks: Chunk[];
   warnings: Warning[];
@@ -21,6 +24,7 @@ export function chunk(blocks: Block[], budget: Budget, tokenizer: Tokenizer): Ch
   let tokens = 0;
   let ids: string[] = [];
   let anchor: string | undefined;
+  let headings: string[] = [];
 
   const close = () => {
     if (!text) return;
@@ -32,21 +36,27 @@ export function chunk(blocks: Block[], budget: Budget, tokenizer: Tokenizer): Ch
       blocks: ids,
     };
     if (anchor) done.anchor = anchor;
+    if (headings.length) done.headings = headings;
     chunks.push(done);
     text = '';
     tokens = 0;
     ids = [];
     anchor = undefined;
+    headings = [];
   };
 
   const add = (piece: string, pieceTokens: number, block: Block) => {
     const joined = text ? `${text}\n\n${piece}` : piece;
     const fits = tokens + pieceTokens <= budget.maxTokens && joined.length <= budget.maxChars;
-    if (!fits) close();
+    // A section that would not fit whole starts its own chunk: closing a
+    // half-full chunk at a heading keeps the anchor honest about what follows.
+    const sectionStart = block.kind === 'heading' && tokens >= budget.maxTokens * HEADING_CLOSE_SHARE;
+    if (!fits || sectionStart) close();
     text = text ? `${text}\n\n${piece}` : piece;
     tokens += pieceTokens;
     if (!ids.includes(block.id)) ids.push(block.id);
     anchor ??= block.anchor;
+    if (block.kind === 'heading' && !headings.includes(block.text)) headings.push(block.text);
   };
 
   for (const block of blocks) {

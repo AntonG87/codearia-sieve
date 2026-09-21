@@ -222,8 +222,8 @@ test('a short article wrapped in heavy navigation is judged against its main reg
 // B15 — very large pages get a sampled raw count, and say so.
 test('the raw token count on a huge page is an estimate and is flagged', async () => {
   const para = '<p>Elizabeth Bennet walked to Meryton with her sisters and talked of the militia. </p>';
-  const html = `<html><body><article>${para.repeat(14_000)}</article></body></html>`;
-  assert.ok(html.length > 1_000_000);
+  const html = `<html><body><article>${para.repeat(28_000)}</article></body></html>`;
+  assert.ok(html.length > 2_000_000);
   const r = await sieve({ kind: 'html', html, url: URL_ }, { now: NOW });
   assert.equal(r.usage.rawTokensEstimated, true);
   assert.ok(r.usage.rawTokens > 100_000);
@@ -399,5 +399,20 @@ test('an oversized table is cut between rows, not inside one', async () => {
   for (const c of r.state.chunks) {
     assert.ok(c.text.startsWith('Code: E') || c.text.startsWith('Code | '), c.text.slice(0, 40));
     assert.ok(/\.$/.test(c.text.trimEnd()), c.text.slice(-40));
+  }
+});
+
+// Lab 6: a greedy chunker cut Wikipedia mid-section, so a chunk's anchor named
+// a section it mostly was not about; and in summary mode an agent could not
+// tell what a chunk covered.
+test('a heading closes a half-full chunk, and every chunk lists its headings', async () => {
+  const section = (n: number) => `<h2 id="s${n}">Section ${n}</h2>${`<p>Paragraph of section ${n} with enough words to weigh something on the budget scale. </p>`.repeat(30)}`;
+  const html = `<html><body><article><h1>Doc</h1>${Array.from({ length: 8 }, (_, i) => section(i + 1)).join('')}</article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://x.test/doc' }, { now: NOW, budget: { maxTokens: 1500, maxChars: 50000 } });
+  assert.ok(r.state.chunks.length >= 4, `chunks ${r.state.chunks.length}`);
+  for (const c of r.state.chunks.slice(1)) {
+    assert.match(c.text, /^Section \d/, c.text.slice(0, 30));
+    assert.ok(c.headings && c.headings.length >= 1 && c.text.startsWith(c.headings[0]!), JSON.stringify(c.headings));
+    assert.match(c.anchor ?? '', /^#s\d/, c.anchor ?? '');
   }
 });

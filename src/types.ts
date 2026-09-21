@@ -64,6 +64,8 @@ export interface Chunk {
   chars: number;
   /** Where to look on the page to verify a decision made from this chunk. */
   anchor?: string;
+  /** The headings inside this chunk, in order: its outline without its text. */
+  headings?: string[];
   /** Ids of the blocks this chunk was built from. */
   blocks: string[];
 }
