@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDate } from '../src/normalize/dates.ts';
+import { fromByline, parseDate } from '../src/normalize/dates.ts';
 
 const NOW = new Date('2026-09-21T12:00:00Z');
 
@@ -55,4 +55,9 @@ test('abstains rather than guesses', () => {
   assert.equal(parseDate('version 15.09'), undefined);
   // A real date that never existed is not a date.
   assert.equal(parseDate('31.02.2026'), undefined);
+});
+
+test('a line that opens with an ISO date is a byline', () => {
+  assert.equal(fromByline(['Node.js 22.14.0 (LTS)', '2025-02-11, Version 22.14.0 ‘Jod’ (LTS), @aduh95']), '2025-02-11');
+  assert.equal(fromByline(['Numbers 2025-02-11 in the middle do not count']), undefined);
 });

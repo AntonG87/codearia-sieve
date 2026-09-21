@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { extractFacts, readNumber } from '../src/normalize/numbers.ts';
 import type { Block } from '../src/types.ts';
 
-const block = (text: string, id = 'b1'): Block => ({ id, kind: 'paragraph', text });
+const block = (text: string, id = 'b1', kind: Block['kind'] = 'paragraph'): Block => ({ id, kind, text });
 const pairs = (facts: ReturnType<typeof extractFacts>) => facts.map((f) => [f.value, f.unit]);
 
 test('currency before the number, with a rate after it', () => {
@@ -108,4 +108,23 @@ test('facts are traceable to their block', () => {
     ['b7', 'GB'],
     ['b9', 'GB'],
   ]);
+});
+
+// Seen with Jev as the judge: a table row gave labels like "jev_jev_jev", the
+// two rates in a row header were dropped, and a citation's "256 с." (pages)
+// became seconds.
+test('a table row header names the fact and rates pair up by position', () => {
+  const facts = extractFacts(
+    [block('Jev 1.13 | jev-1.13.0\nJev 1.13: Price (per Btok / per Mtok) | jev-1.13.0: $42 / $0.042', 'b3', 'table')],
+    'en',
+  );
+  assert.deepEqual(
+    facts.map((f) => [f.label, f.value, f.unit]),
+    [['price_btok_mtok', 42, 'USD_per_billion'], ['price_btok_mtok', 0.042, 'USD_per_million']],
+  );
+});
+
+test('Cyrillic "с." after a number is a page count, not seconds', () => {
+  assert.equal(extractFacts([block('Иванов И. Парсинг. — М., 2001. — 256 с.')], 'ru').length, 0);
+  assert.equal(extractFacts([block('Ответ пришёл за 256 с при нагрузке.')], 'ru')[0]?.unit, 's');
 });

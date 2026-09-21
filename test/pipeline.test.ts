@@ -258,3 +258,18 @@ test('expected failures come back as warnings, not exceptions', async () => {
   assert.equal(r.state.chunks.length, 0);
   assert.equal(r.usage.rawTokens, 0);
 });
+
+// A table block keeps one row per line, so facts can find their row header
+// and pair "per Btok / per Mtok" with "$42 / $0.042" by position.
+test('table rows stay on separate lines and yield labelled, rated facts', async () => {
+  const html = `<html><body><article><h1>Models</h1><p>${'Prose about the model. '.repeat(20)}</p>
+    <table><tr><th>Jev 1.13</th><th>jev-1.13.0</th></tr>
+    <tr><td>Price (per Btok / per Mtok)</td><td>$42 / $0.042</td></tr>
+    <tr><td>Rate limits</td><td>250,000 tokens per second</td></tr></table></article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://x.test/models' }, { now: NOW });
+  assert.deepEqual(
+    r.state.facts.map((f) => [f.label, f.value, f.unit]),
+    [['price_btok_mtok', 42, 'USD_per_billion'], ['price_btok_mtok', 0.042, 'USD_per_million'], ['rate_limits', 250000, 'token_per_s']],
+  );
+  assert.match(r.state.chunks[0]!.text, /Price \(per Btok \/ per Mtok\) \| jev-1\.13\.0: \$42 \/ \$0\.042\n/);
+});

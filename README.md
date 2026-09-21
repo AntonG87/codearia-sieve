@@ -30,7 +30,7 @@ npm i codearia-sieve        # or the library
   <img src="docs/banners/stats.svg" alt="Median token saving 98.5%. Median page: 53 718 tokens before, 1 106 after. 1.1 s per page. 50 of 56 random pages usable, 9 languages." width="100%">
 </p>
 
-<p align="center"><sub>56 random pages on 21 September 2026: fresh news from nine RSS feeds in seven languages, random Wikipedia articles, docs, blogs, government sites, recipes, shops. Every row is in <a href="bench/analytics/">bench/analytics/</a>; <code>npm run analytics</code> reproduces it.</sub></p>
+<p align="center"><sub><strong>Measured, not promised.</strong> The numbers come from a live run over 56 random pages on 21 September 2026 — fresh news from nine RSS feeds in seven languages, random Wikipedia articles, docs, blogs, government sites, recipes, shops. Every row is in <a href="bench/analytics/">bench/analytics/</a>, and <code>npm run analytics</code> reruns the whole thing. The output was then put in front of a decision model: see <a href="#checked-by-a-judge">Checked by a judge</a>.</sub></p>
 
 <br>
 
@@ -110,13 +110,13 @@ Eight steps of ordinary code. No model runs unless you plug one in. The same HTM
 const r = await sieve({ kind: 'url', url: 'https://docs.typesafe.ai/models' });
 
 r.state.title         // "Models"
-r.state.publishedAt   // "2026-09-15"
-r.state.facts[0]      // { value: 42, unit: "USD_per_billion", label: "price_per_btok",
-                      //   context: "Price per Btok: $42", from: "b7" }
-r.state.chunks[0]     // { id: "c1", tokens: 1206, chars: 4860, anchor: "#pricing",
-                      //   blocks: ["b1", …, "b23"], text: "…" }
-r.usage               // { rawTokens: 126447, stateTokens: 1206,
-                      //   visibleChars: 4802, stateChars: 4860, chunks: 1, ms: 1238 }
+r.state.facts[0]      // { value: 42, unit: "USD_per_billion", label: "price_btok_mtok",
+                      //   context: "Price (per Btok / per Mtok) | jev-1.13.0: $42 / $0.042", from: "b3" }
+r.state.facts[1]      // { value: 0.042, unit: "USD_per_million", … }   — paired by position
+r.state.chunks[0]     // { id: "c1", tokens: 1210, chars: 5357, anchor: "Current models",
+                      //   blocks: ["b1", …, "b36"], text: "…" }
+r.usage               // { rawTokens: 127413, stateTokens: 1211,
+                      //   visibleChars: 4939, stateChars: 5357, chunks: 1, ms: 1503 }
 r.warnings            // []
 r.markdown            // the same article, for a human or a generative model
 ```
@@ -168,6 +168,22 @@ The text of one chunk from the last result for that URL, no refetch. Overview fi
 </table>
 
 Pairs with [`jev-mcp`](https://github.com/jkudish/jev-mcp): chunks are sized to fit its fields, so state goes straight into a typed question.
+
+## Checked by a judge
+
+The claim is that a decision model gets *better* input from Sieve than from raw text. So the output was handed to one. [`examples/jev.ts`](examples/jev.ts) drives both MCP servers with the official client — `codearia-sieve` prepares six pages (API docs, a release note, two Wikipedia articles in two languages, two pricing pages), [Jev](https://docs.typesafe.ai/models) judges them through `jev-mcp`. Same run, 21 September 2026:
+
+| Question to Jev | Input from Sieve | Result |
+|---|---|---|
+| `jev_classify` — what kind of page is this? | title + head of the first chunk, under the tool's 2 000-char limit | 6 of 6 correct; 5 auto, 1 flagged for review — a page that is both docs and a rate card |
+| `jev_verify` — is each extracted fact really on the page? | every fact as a claim, its chunks as evidence | **11 of 11 verified, all auto**, confidence 0.86–1.0 |
+| `jev_extract` — when was it published? | first chunk, a date regex, a description | agrees with Sieve where the page states a date; Sieve also reads JSON-LD and `<meta>`, which Jev never sees |
+
+The first pass of this test did its job the other way round: Jev sent three facts to review and contradicted one. All four traced to Sieve — a table row labelled by its column header instead of its row header, two rates in one header left unpaired, and a Russian bibliographic "256 с." read as seconds. Fixed, tested, rerun: 11 of 11. A judge that can tell you when your parser is wrong is the point of the whole pairing.
+
+```sh
+TYPESAFE_API_KEY=… node --experimental-strip-types examples/jev.ts
+```
 
 ## Use it as a library
 

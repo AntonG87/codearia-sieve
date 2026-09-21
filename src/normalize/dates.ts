@@ -285,7 +285,15 @@ const BYLINE = /(?<!\p{L})(published|posted|updated|опубликовано|о�
  */
 export function fromByline(lines: string[], options: ParseDateOptions = {}): string | undefined {
   for (const line of lines) {
-    if (line.length > 160 || !BYLINE.test(line)) continue;
+    if (line.length > 160) continue;
+    // A line that opens with an ISO date announces itself without a word:
+    // release notes and changelogs are written "2025-02-11, Version 22.14.0".
+    const iso = /^(\d{4}-\d{2}-\d{2})(?!\d)/.exec(line);
+    if (iso) {
+      const date = parseDate(iso[1]!, options);
+      if (date) return date;
+    }
+    if (!BYLINE.test(line)) continue;
     const date = parseDate(line, options);
     if (date) return date;
   }

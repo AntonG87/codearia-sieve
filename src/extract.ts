@@ -468,10 +468,14 @@ export function dropChrome(blocks: Block[]): Built {
  * next to punctuation ("word ." → "word.", "( lit." → "(lit.").
  */
 function normalize(text: string): string {
+  // Line breaks carry structure — a table row, a list item, a line of code —
+  // so they survive; every other run of whitespace becomes one space.
   return text
-    .replace(/\s+/g, ' ')
-    .replace(/\s+([.,;:!?%)\]»])/g, '$1')
-    .replace(/([(\[«])\s+/g, '$1')
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/ ?\n ?/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .replace(/[^\S\n]+([.,;:!?%)\]»])/g, '$1')
+    .replace(/([(\[«])[^\S\n]+/g, '$1')
     .trim();
 }
 

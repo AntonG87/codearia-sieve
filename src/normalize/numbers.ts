@@ -23,7 +23,8 @@ const UNITS: [RegExp, string][] = [
   [/^(?:tokens?|токен(?:ов|а)?)(?!\p{L})/iu, 'token'],
   [/^(?:requests?|запрос(?:ов|а)?|req)(?!\p{L})/iu, 'request'],
   [/^(?:milliseconds?|ms|мс)(?!\p{L})/iu, 'ms'],
-  [/^(?:seconds?|sec|s|сек(?:унд[аы]?)?|с)(?!\p{L})/iu, 's'],
+  // Cyrillic "с." with a period is a page count in a citation ("— 256 с."), not seconds.
+  [/^(?:seconds?|sec|s|сек(?:унд[аы]?)?|с(?!\.))(?!\p{L})/iu, 's'],
   [/^(?:minutes?|min|мин(?:ут[аы]?)?)(?!\p{L})/iu, 'min'],
   [/^(?:hours?|h|час(?:ов|а)?)(?!\p{L})/iu, 'h'],
   [/^(?:days?|дн(?:ей|я)|день)(?!\p{L})/iu, 'day'],
@@ -232,22 +233,32 @@ function scan(text: string, locale: NumberLocale, inTable = false): Hit[] {
     if (inTable && !/_per_/.test(unit)) {
       // The cell first ("Price per Btok: $42"), then the whole row, where a
       // row header such as "Price (per Btok)" names the rate for its cells.
-      // A row that names several rates is left alone: pairing them with the
-      // right numbers would be a guess.
       const rowStart = text.lastIndexOf('\n', start) + 1;
       const cellStart = Math.max(text.lastIndexOf('|', start) + 1, rowStart);
       for (const scope of [text.slice(cellStart, start), text.slice(rowStart, start)]) {
-        const found = new Set(HEADER_RATES.filter(([re]) => re.test(scope)).map(([, rate]) => rate));
-        if (found.size === 1) {
-          unit = `${unit}_${[...found][0]}`;
+        const found = ratesIn(scope);
+        if (found.length === 1) {
+          unit = `${unit}_${found[0]}`;
           break;
         }
-        if (found.size > 1) break;
+        if (found.length > 1) {
+          // "Price (per Btok / per Mtok) | $42 / $0.042": as many rates as
+          // numbers in the cell value, in the same order — pair by position.
+          // The value starts after the column header ("jev-1.13.0: ").
+          const cellEnd = Math.min(...[text.indexOf('|', start), text.indexOf('\n', start), text.length].filter((i) => i !== -1));
+          const cell = text.slice(cellStart, cellEnd);
+          const colon = cell.indexOf(': ');
+          const valueStart = cellStart + (colon === -1 || cellStart + colon >= start ? 0 : colon + 2);
+          const numbersInCell = text.slice(valueStart, cellEnd).match(NUMBER_TOKEN) ?? [];
+          const index = (text.slice(valueStart, start).match(NUMBER_TOKEN) ?? []).length;
+          if (numbersInCell.length === found.length) unit = `${unit}_${found[index]}`;
+          break;
+        }
       }
     }
 
     const context = sentenceAround(text, start, end);
-    const label = labelFor(context, unit);
+    const label = inTable ? rowLabel(text, start) ?? labelFor(context, unit) : labelFor(context, unit);
 
     // A range keeps both ends: "3–329 секунд" is two facts, not the larger one.
     const low = RANGE_LOW.exec(before);
@@ -260,6 +271,40 @@ function scan(text: string, locale: NumberLocale, inTable = false): Hit[] {
     hits.push({ value, unit, label, context });
   }
   return hits;
+}
+
+/** Rates named in a header fragment, in order of appearance, without repeats. */
+function ratesIn(scope: string): string[] {
+  const found: { at: number; rate: string }[] = [];
+  for (const [re, rate] of HEADER_RATES) {
+    const m = re.exec(scope);
+    if (m && !found.some((f) => f.rate === rate)) found.push({ at: m.index, rate });
+  }
+  return found.sort((a, b) => a.at - b.at).map((f) => f.rate);
+}
+
+/** A number token as it appears in text, for counting numbers within a cell. */
+const NUMBER_TOKEN = /\d+(?:[.,\s]\d+)*/g;
+
+/**
+ * In a table the row header names what the row measures: for
+ * "Jev 1.13: Price (per Btok) | jev-1.13.0: $42" that is "Price (per Btok)".
+ * The first cell of the row, without its column header, gives the label.
+ */
+function rowLabel(text: string, start: number): string | undefined {
+  const rowStart = text.lastIndexOf('\n', start) + 1;
+  const rowEnd = text.indexOf('\n', start);
+  const row = text.slice(rowStart, rowEnd === -1 ? undefined : rowEnd);
+  const first = row.split(' | ')[0] ?? '';
+  if (first.trim() === '' || text.slice(rowStart, start).indexOf(' | ') === -1) return undefined;
+  const colon = first.indexOf(': ');
+  const cell = colon === -1 ? first : first.slice(colon + 2);
+  const words = cell
+    .toLowerCase()
+    .replace(/[^\p{L}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 1 && !STOP.has(w));
+  return words.length ? words.slice(0, 4).join('_') : undefined;
 }
 
 /** The sentence the number sits in, trimmed to a readable length. */
