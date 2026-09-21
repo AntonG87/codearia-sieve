@@ -45,7 +45,7 @@ An agent that needs a web page fetches the whole thing: navigation, cookie banne
 
 **Dates become dates**
 
-`"опубликовано 15 сентября 2026"` → `"2026-09-15"`.
+`"Published September 15, 2026"` → `"2026-09-15"`.
 Read from JSON-LD, meta tags and `<time>` first; from a byline only when the markup is silent, and never guessed.
 
 </td>
@@ -53,8 +53,8 @@ Read from JSON-LD, meta tags and `<time>` first; from a byline only when the mar
 
 **Numbers become facts**
 
-`"$42 за миллиард токенов"` → `{ value: 42, unit: "USD_per_billion" }`.
-The decimal comma follows the page's language. A number without a unit is not a fact. A year is never a fact.
+`"$42 per billion tokens"` → `{ value: 42, unit: "USD_per_billion" }`.
+Works in nine languages; the decimal comma follows the page's language. A number without a unit is not a fact. A year is never a fact.
 
 </td>
 <td width="33%" valign="top">
@@ -207,6 +207,6 @@ npm run bench               # the 20-page benchmark set
 npm run analytics           # the 56-page random sample: rows, CSV, summary
 ```
 
-Design notes are in [`docs/`](docs/) — vision, architecture, roadmap, research — in Russian, the working language of the team.
+Design notes — vision, architecture, roadmap, research — are in [`docs/`](docs/).
 
 <p align="center"><sub>MIT © 2026 Anton Evelson · <a href="https://academy.codearia.com/">Codearia Academy</a></sub></p>
