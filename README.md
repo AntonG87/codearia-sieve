@@ -210,6 +210,7 @@ await sieve(input, {
 - **Front pages, listings and product pages** have no article to find. You get the headlines and a `thin-content` warning, not a fake win.
 - **Articles rendered by JavaScript** come back as `empty-without-js` when the container is empty. A site that ships a teaser and streams the rest cannot be told apart without a browser; you get the teaser.
 - **Text-heavy pages save less.** A whole novel saves 22 %, an RFC 84 %: there is no wrapping to remove and the text is kept in full. That is the tool working.
+- **A pricing grid is not a table.** A fact knows the block it came from, not the plan column it sits under; Sieve does not guess the pairing. Send the chunk — a pricing page is about a thousand tokens after cleaning — and let the judge read it: [`examples/pricing-watch.ts`](examples/pricing-watch.ts).
 - **Tokens are counted with o200k** as an approximation. Pages over a megabyte get a sampled count and `usage.rawTokensEstimated: true`.
 
 ## Develop
