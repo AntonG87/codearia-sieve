@@ -128,3 +128,12 @@ test('Cyrillic "с." after a number is a page count, not seconds', () => {
   assert.equal(extractFacts([block('Иванов И. Парсинг. — М., 2001. — 256 с.')], 'ru').length, 0);
   assert.equal(extractFacts([block('Ответ пришёл за 256 с при нагрузке.')], 'ru')[0]?.unit, 's');
 });
+
+// Lab 4: Hebrew and Arabic press write numbers the English way and name
+// currencies and scales in words after the number.
+test('Hebrew and Arabic currencies, scales and units become facts', () => {
+  const he = extractFacts([block('העסקה נסגרה ב-3,000 ש"ח ובסך הכל 2 מיליון דולר; הנסיעה נמשכה 45 דקות לאורך 120 ק"מ.')], 'he');
+  assert.deepEqual(he.map((f) => [f.value, f.unit]), [[3000, 'ILS'], [2e6, 'USD'], [45, 'min'], [120, 'km']]);
+  const ar = extractFacts([block('بلغت قيمة الصفقة 500 مليون دولار، وارتفعت الأسعار 12 بالمئة خلال 3 أيام.')], 'ar');
+  assert.deepEqual(ar.map((f) => [f.value, f.unit]), [[5e8, 'USD'], [12, '%'], [3, 'day']]);
+});

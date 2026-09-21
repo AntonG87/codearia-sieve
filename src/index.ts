@@ -21,6 +21,10 @@ const THIN_STATE_CHARS = 2_400;
  * passes and a front page (a few percent) does not.
  */
 const THIN_SHARE = 0.35;
+/** Below this much state, a page that declares a paywall in JSON-LD served only its teaser. */
+const PAYWALL_TEASER_CHARS = 3_000;
+/** …and kept less than this share of the visible text: a short article served whole is not a teaser. */
+const PAYWALL_TEASER_SHARE = 0.8;
 
 /** Bot challenges and refusals; the status alone is not enough (some send 200). */
 const BLOCK_TITLE = /just a moment|attention required|access denied|are you a human|human verification|verify you are|robot check|captcha/i;
@@ -78,10 +82,6 @@ export async function sieve(input: Input, options: SieveOptions = {}): Promise<R
     warnings.push({ code: 'http-error', detail: `status ${status}${extracted.title ? `, "${extracted.title}"` : ''}` });
   }
   warnings.push(...(extracted?.warnings ?? []).filter((w) => !(blocked && w.code === 'no-main-content')));
-  // A teaser behind a subscription wall is not the article; say so instead of "thin".
-  if (extracted?.paywalled && !blocked) {
-    warnings.push({ code: 'paywall', detail: 'the page marks its article as not free; only the teaser was available' });
-  }
 
   let blocks = extracted?.blocks ?? [];
   if (options.task && options.selector && blocks.length) {
@@ -119,9 +119,25 @@ export async function sieve(input: Input, options: SieveOptions = {}): Promise<R
   // caller should know that the small state is a property of the page, not
   // a clean win. A short page that we returned nearly whole is fine.
   const bodyChars = extracted?.bodyChars ?? 0;
+
+  // A teaser behind a subscription wall is not the article; say so instead of
+  // "thin". A page that only declares the wall in JSON-LD but served the whole
+  // text is not behind one.
+  const paywall =
+    !!extracted &&
+    !blocked &&
+    (extracted.paywalled === 'stated' ||
+      (extracted.paywalled === 'declared' && stateChars < PAYWALL_TEASER_CHARS && stateChars < (extracted.bodyChars ?? 0) * PAYWALL_TEASER_SHARE));
+  if (paywall) {
+    warnings.push({
+      code: 'paywall',
+      detail: stateChars < PAYWALL_TEASER_CHARS ? 'the page marks its article as not free; only the teaser was available' : 'the page says its article is for subscribers; check that the text is complete',
+    });
+  }
+
   if (
     !blocked &&
-    !extracted?.paywalled &&
+    !paywall &&
     rawTokens >= THIN_RAW_TOKENS &&
     stateChars > 0 &&
     stateChars < THIN_STATE_CHARS &&

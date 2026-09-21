@@ -321,3 +321,37 @@ test('a scripted product page with a few hundred visible characters is empty-wit
   const r = await sieve({ kind: 'html', html, url: 'https://shop.example/p/1' }, { now: NOW });
   assert.ok(r.warnings.some((w) => w.code === 'empty-without-js'), JSON.stringify(r.warnings));
 });
+
+// Lab 4 (Hebrew and Arabic news): globes.co.il flags every article
+// isAccessibleForFree:false in JSON-LD and serves the whole text anyway.
+test('a JSON-LD paywall flag on a page that served the full article is not a paywall', async () => {
+  const body = 'שוק ההון סיים את היום בעליות, והריבית במשק נותרה ללא שינוי. '.repeat(80);
+  const html = `<html><head><script type="application/ld+json">{"@type":"NewsArticle","isAccessibleForFree":false,"datePublished":"2026-09-21"}</script></head>
+    <body><article><h1>מה קרה לריביות</h1><p>${body}</p></article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://news.example/a' }, { now: NOW });
+  assert.ok(!r.warnings.some((w) => w.code === 'paywall'), JSON.stringify(r.warnings));
+  const teaser = html.replace(body, 'שוק ההון סיים את היום בעליות. לרכישת מנוי לחצו כאן.');
+  const t = await sieve({ kind: 'html', html: teaser, url: 'https://news.example/a' }, { now: NOW });
+  assert.ok(t.warnings.some((w) => w.code === 'paywall'), JSON.stringify(t.warnings));
+});
+
+// Lab 4: haaretz.co.il and globes.co.il both mark the article body with
+// hasPart.cssSelector; one serves the body, the other serves a teaser.
+test('the walled part named in JSON-LD decides: served in full is no paywall, missing is one', async () => {
+  const ld = '<script type="application/ld+json">{"@type":"NewsArticle","isAccessibleForFree":"false","hasPart":{"@type":"WebPageElement","isAccessibleForFree":"false","cssSelector":".article-body"}}</script>';
+  const body = 'הריבית במשק נותרה ללא שינוי והבורסה סיימה בעליות. '.repeat(60);
+  const full = `<html><head>${ld}</head><body><article><h1>כותרת</h1><div class="article-body"><p>${body}</p></div></article></body></html>`;
+  const r = await sieve({ kind: 'html', html: full, url: 'https://news.example/full' }, { now: NOW });
+  assert.ok(!r.warnings.some((w) => w.code === 'paywall'), JSON.stringify(r.warnings));
+  const teaser = `<html><head>${ld}</head><body><article><h1>כותרת</h1><p>${body.slice(0, 200)}</p><div class="article-body"></div></article></body></html>`;
+  const t = await sieve({ kind: 'html', html: teaser, url: 'https://news.example/teaser' }, { now: NOW });
+  assert.ok(t.warnings.some((w) => w.code === 'paywall'), JSON.stringify(t.warnings));
+  // haaretz.co.il serves the first paragraph inside the walled part and a "loading…" marker after it.
+  const loading = `<html><head>${ld}</head><body><article><h1>כותרת</h1><div class="article-body"><p>${body.slice(0, 500)}</p><p>טוען...</p></div></article></body></html>`;
+  const l = await sieve({ kind: 'html', html: loading, url: 'https://news.example/premium' }, { now: NOW });
+  assert.ok(l.warnings.some((w) => w.code === 'paywall'), JSON.stringify(l.warnings));
+  // A short brief served whole inside the walled part is not a teaser.
+  const brief = `<html><head>${ld}</head><body><article><h1>כותרת</h1><div class="article-body"><p>${body.slice(0, 500)}</p></div></article></body></html>`;
+  const b = await sieve({ kind: 'html', html: brief, url: 'https://news.example/brief' }, { now: NOW });
+  assert.ok(!b.warnings.some((w) => w.code === 'paywall'), JSON.stringify(b.warnings));
+});

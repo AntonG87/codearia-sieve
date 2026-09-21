@@ -19,7 +19,8 @@ export interface Extracted {
   /** Visible text length of the original body, for judging thin results. */
   bodyChars: number;
   /** The page says its article is not free, or shows a subscription wall. */
-  paywalled: boolean;
+  /** 'stated' when the page says so in words; 'declared' when only JSON-LD flags it. */
+  paywalled: false | 'declared' | 'stated';
 }
 
 export interface ExtractOptions {
@@ -118,12 +119,55 @@ export async function extract(html: string, url: string, options: ExtractOptions
 const PAYWALL_TEXT =
   /(subscribe to (continue|read)|subscribers only|for subscribers|sign in to continue reading|réservé aux abonnés|article réservé|abonnez-vous pour lire|nur für abonnenten|können den artikel leider nicht|mit spiegel\+|solo para suscriptores|suscríbete para seguir|только для подписчиков|доступно по подписке|подпишитесь, чтобы (читать|продолжить)|לרכישת מנוי|למנויים בלבד)/iu;
 
-function looksPaywalled(document: Document): boolean {
-  if (jsonLdValue(document, 'isAccessibleForFree') === false) return true;
+function looksPaywalled(document: Document): false | 'declared' | 'stated' {
   const title = document.querySelector('title')?.textContent ?? '';
-  if (/^\(S\+\)|\bpremium\b|\bpaywall\b/i.test(title)) return true;
-  const text = (document.body?.textContent ?? '').replace(/\s+/g, ' ');
-  return PAYWALL_TEXT.test(text);
+  if (/^\(S\+\)|\bpremium\b|\bpaywall\b/i.test(title)) return 'stated';
+  // Only what a reader sees in the article region counts: a hidden print
+  // dialog saying "printing is for subscribers" is not a wall.
+  if (PAYWALL_TEXT.test(readerText(document))) return 'stated';
+  // Google's paywall markup names the walled element: hasPart.cssSelector.
+  // If that element came through with its text, the wall was not applied
+  // to this response; if it is missing or nearly empty, this is the teaser.
+  const walled = wallSelectors(jsonLdValue(document, 'hasPart'));
+  for (const selector of walled) {
+    let el: Element | null = null;
+    try {
+      el = document.querySelector(selector);
+    } catch {
+      continue;
+    }
+    const text = (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    // A short news brief is walled in full too: the part is most of the page.
+    // But a part that ends in "Loading…" is waiting for the rest.
+    const truncated = LOADING_TAIL.test(text);
+    const served = !truncated && (text.length >= WALLED_PART_MIN_CHARS || text.length >= readerText(document).trim().length * WALLED_PART_MIN_SHARE);
+    return served ? false : 'stated';
+  }
+  // Sites set the schema.org flag on every article for the search engines'
+  // sake and still serve the whole text; the flag alone is a weak signal.
+  const flag = jsonLdValue(document, 'isAccessibleForFree');
+  if (flag === false || flag === 'false') return 'declared';
+  return false;
+}
+
+/** A walled part that still carries this much text was served in full. */
+const WALLED_PART_MIN_CHARS = 1500;
+/** …or this share of everything a reader sees on the page: a brief is short and whole. */
+const WALLED_PART_MIN_SHARE = 0.6;
+/** A walled part that ends with a loading marker is the teaser, whatever its size. */
+const LOADING_TAIL = /(?:loading|טוען|загрузка|chargement|cargando|wird geladen|caricamento)[.…\s]*$/iu;
+
+/** CSS selectors of the parts JSON-LD marks as not free. */
+function wallSelectors(hasPart: unknown): string[] {
+  const parts = Array.isArray(hasPart) ? hasPart : hasPart ? [hasPart] : [];
+  const out: string[] = [];
+  for (const part of parts) {
+    if (!part || typeof part !== 'object') continue;
+    const p = part as Record<string, unknown>;
+    const notFree = p.isAccessibleForFree === false || p.isAccessibleForFree === 'false';
+    if (notFree && typeof p.cssSelector === 'string' && p.cssSelector.trim()) out.push(p.cssSelector.trim());
+  }
+  return out;
 }
 
 /**
@@ -177,6 +221,16 @@ function textLength(fragment: string): number {
  * body. A Wikipedia stub has 400 characters of article inside 30 000 of
  * menus; judging "thin" against the menus would flag every short article.
  */
+/** The article region's visible text with chrome and hidden elements removed. */
+function readerText(document: Document): string {
+  const body = document.body?.cloneNode(true) as Element | undefined;
+  if (!body) return '';
+  for (const el of Array.from(body.querySelectorAll('script,style,noscript,template,svg,nav,header,footer,aside,dialog,[hidden],[aria-hidden="true"],[style*="display:none"],[style*="display: none"]'))) el.remove();
+  const main = body.querySelector('main, [role="main"], #content, #main, article');
+  const region = main && (main.textContent ?? '').trim().length > 200 ? main : body;
+  return (region.textContent ?? '').replace(/\s+/g, ' ');
+}
+
 function visibleTextLength(document: Document): number {
   // Work on a copy: the original document still feeds the id index.
   const body = document.body?.cloneNode(true) as Element | undefined;

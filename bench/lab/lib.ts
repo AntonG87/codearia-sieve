@@ -38,7 +38,7 @@ export async function feedLinks(feed: string, n: number): Promise<string[]> {
   return links.slice(0, n).map((l) => l.replace(/&amp;/g, '&'));
 }
 
-export const BAD = new Set(['blocked', 'paywall', 'empty-without-js', 'robots-disallowed', 'fetch-failed', 'tool-error']);
+export const BAD = new Set(['blocked', 'http-error', 'paywall', 'empty-without-js', 'robots-disallowed', 'fetch-failed', 'tool-error']);
 
 export const median = (xs: number[]): number => {
   if (!xs.length) return NaN;

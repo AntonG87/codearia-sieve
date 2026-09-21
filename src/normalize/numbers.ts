@@ -24,10 +24,13 @@ const UNITS: [RegExp, string][] = [
   [/^(?:requests?|запрос(?:ов|а)?|req)(?!\p{L})/iu, 'request'],
   [/^(?:milliseconds?|ms|мс)(?!\p{L})/iu, 'ms'],
   // Cyrillic "с." with a period is a page count in a citation ("— 256 с."), not seconds.
-  [/^(?:seconds?|sec|s|сек(?:унд[аы]?)?|с(?!\.))(?!\p{L})/iu, 's'],
-  [/^(?:minutes?|min|мин(?:ут[аы]?)?)(?!\p{L})/iu, 'min'],
-  [/^(?:hours?|h|час(?:ов|а)?)(?!\p{L})/iu, 'h'],
-  [/^(?:days?|дн(?:ей|я)|день)(?!\p{L})/iu, 'day'],
+  [/^(?:seconds?|sec|s|сек(?:унд[аы]?)?|с(?!\.)|שניות|שנייה|ثانية|ثوان[يٍ]?)(?!\p{L})/iu, 's'],
+  [/^(?:minutes?|min|мин(?:ут[аы]?)?|דקות|דקה|دقيقة|دقائق)(?!\p{L})/iu, 'min'],
+  [/^(?:hours?|h|час(?:ов|а)?|שעות|שעה|ساعة|ساعات)(?!\p{L})/iu, 'h'],
+  [/^(?:days?|дн(?:ей|я)|день|ימים|יום|يوم|أيام|يوماً)(?!\p{L})/iu, 'day'],
+  [/^(?:km|км|ק["״]מ|كم|كيلومتر(?:ات)?)(?!\p{L})/iu, 'km'],
+  [/^(?:kg|кг|ק["״]ג|كغ|كجم|كيلوغرام(?:ات)?)(?!\p{L})/iu, 'kg'],
+  [/^(?:percent|אחוז(?:ים)?|بالمئة|في المئة|بالمائة|في المائة)(?!\p{L})/iu, '%'],
   [/^(?:TB|ТБ)(?!\p{L})/u, 'TB'],
   [/^(?:GB|ГБ)(?!\p{L})/u, 'GB'],
   [/^(?:MB|МБ)(?!\p{L})/u, 'MB'],
@@ -65,16 +68,30 @@ const HEADER_RATES: [RegExp, string][] = [
 
 /** Word multipliers that follow a number: "250 thousand", "3 млн", "188 тысяч". */
 const SCALES: [RegExp, number][] = [
-  [/^(?:thousand|тыс\.?|тысяч[иа]?)(?!\p{L})/iu, 1e3],
-  [/^(?:million|mln|млн\.?|миллион(?:а|ов)?)(?!\p{L})/iu, 1e6],
-  [/^(?:billion|bn|млрд\.?|миллиард(?:а|ов)?)(?!\p{L})/iu, 1e9],
+  [/^(?:thousand|тыс\.?|тысяч[иа]?|אלף|אלפים|ألف|آلاف|الف)(?!\p{L})/iu, 1e3],
+  [/^(?:million|mln|млн\.?|миллион(?:а|ов)?|מיליון|מיליוני|مليون|ملايين)(?!\p{L})/iu, 1e6],
+  [/^(?:billion|bn|млрд\.?|миллиард(?:а|ов)?|מיליארד|מיליארדי|مليار|مليارات)(?!\p{L})/iu, 1e9],
+];
+
+/** Currency words after the number: "300 dollars", "3,000 ש"ח", "500 دولار". */
+const CURRENCY_WORDS: [RegExp, string][] = [
+  [/^(?:dollars?|долл(?:аров|ара|ар)?|דולר(?:ים)?|دولار(?:ات|اً)?)(?!\p{L})/iu, 'USD'],
+  [/^(?:euros?|евро|אירו|يورو)(?!\p{L})/iu, 'EUR'],
+  [/^(?:pounds?|فونت|جنيه(?:ات)?\s+(?:إسترليني|استرليني))(?!\p{L})/iu, 'GBP'],
+  [/^(?:shekels?|שקל(?:ים)?|ש["״]ח|שח|شيكل|شواكل)(?!\p{L})/iu, 'ILS'],
+  [/^(?:руб(?:лей|ля|ль)?\.?|rubles?)(?!\p{L})/iu, 'RUB'],
+  [/^(?:ريال(?:ات)?)(?!\p{L})/iu, 'SAR'],
+  [/^(?:درهم|دراهم)(?!\p{L})/iu, 'AED'],
+  [/^(?:جنيه(?:ات)?)(?!\p{L})/iu, 'EGP'],
 ];
 
 /**
  * A number token: digits with optional separators inside. How the separators
  * are read is decided afterwards, per language.
  */
-const NUMBER = /(?<![\w.,])([-+]?)(\d(?:[\d ,. ]*\d)?)(?![\d])/g;
+// A sign counts only when nothing letter-like precedes it: Hebrew glues a
+// prefix to a number with a hyphen ("ב-3,000" is "in 3,000", not minus).
+const NUMBER = /(?<![\p{L}\p{N}.,])([-+]?)(\d(?:[\d ,. ]*\d)?)(?![\d])/gu;
 
 /** A lower bound written right before the number: "3–329 секунд", "70-500 ms". */
 const RANGE_LOW = /(\d+(?:[.,]\d+)?)\s*[–—-]\s*$/;
@@ -87,8 +104,9 @@ export type NumberLocale = 'ru' | 'en' | 'unknown';
 /** Language tag → separator convention. Only the prefix matters. */
 export function localeFor(language?: string): NumberLocale {
   const tag = (language ?? '').toLowerCase();
-  if (/^(ru|uk|be|kk|de|fr|es|it|pl|cs|tr|he)/.test(tag)) return 'ru';
-  if (/^(en|ja|zh|ko)/.test(tag)) return 'en';
+  if (/^(ru|uk|be|kk|de|fr|es|it|pl|cs|tr)/.test(tag)) return 'ru';
+  // Hebrew and Arabic press write 3,322 and 0.5 the English way.
+  if (/^(en|ja|zh|ko|he|ar)/.test(tag)) return 'en';
   return 'unknown';
 }
 
@@ -201,6 +219,16 @@ function scan(text: string, locale: NumberLocale, inTable = false): Hit[] {
       if (code) {
         unit = code[1]!.toUpperCase();
         after = after.slice(code[0].length).replace(/^\s+/, '');
+      }
+    }
+    if (!unit) {
+      for (const [re, code] of CURRENCY_WORDS) {
+        const w = re.exec(after);
+        if (w) {
+          unit = code;
+          after = after.slice(w[0].length).replace(/^\s+/, '');
+          break;
+        }
       }
     }
     if (!unit && /^%/.test(after)) {
