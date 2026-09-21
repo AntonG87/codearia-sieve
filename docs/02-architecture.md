@@ -1,194 +1,187 @@
-# Sieve. Технический подход
+# codearia-sieve. Technical approach
 
-Документ отвечает на вопрос «как это устроено внутри». Решения здесь
-предварительные: то, что помечено как открытый вопрос, решается до кода.
+This document answers "how it works inside". Anything marked as an open
+question is decided before it is coded.
 
 ---
 
-## Границы, которые задаёт потребитель
+## Limits set by the consumer
 
-Всё устройство диктуется тем, для кого готовится материал. Цифры Jev на
-20.09.2026, проверены по `docs.typesafe.ai/models`:
+The whole design follows from who the material is prepared for. Jev's numbers
+as of September 20, 2026, checked against `docs.typesafe.ai/models`:
 
-| Ограничение | Значение | Что из этого следует |
+| Limit | Value | What follows |
 |---|---|---|
-| Контекст запроса | 64k токенов | Нарезка обязательна, а не опциональна |
-| Состояние + самый длинный вопрос | 32k токенов | Целевой размер куска ~20k, с запасом под вопросы |
-| Лимиты | 250k токенов/с, 1200 запросов/мин | Батчинг на нашей стороне, очередь на пиках |
-| Вход | только текст | Картинки, PDF и таблицы приводим к тексту сами |
-| Не считает | — | Числа считает наш код и кладёт готовыми |
-| Даты читает как текст | — | Даты извлекаем и нормализуем в ISO |
-| Context rot | точность падает от лишнего | Фильтрация по релевантности это не украшение, а функция |
+| Request context | 64k tokens | Chunking is mandatory, not optional |
+| State + longest question | 32k tokens | Target chunk ~20k, with headroom for questions |
+| Rate limits | 250k tokens/s, 1 200 requests/min | Batching on our side, a queue at peaks |
+| Input | text only | Images, PDFs and tables are reduced to text by us |
+| Does not count | — | Our code computes numbers and passes them ready |
+| Reads dates as text | — | Dates are extracted and normalised to ISO |
+| Context rot | accuracy drops with irrelevant material | Relevance filtering is a function, not decoration |
 
-Версии и лимиты у вендора двигаются, о чём он предупреждает сам. Значения
-держим в конфиге, а не в коде.
+Vendor versions and limits move, as the vendor itself warns. The values live
+in `src/limits.ts`, not in the pipeline code.
 
-## Конвейер
+## The pipeline
 
 ```
-URL или задача
+URL or HTML
       ↓
-[1] Забор            robots, кеш, повторы, таймауты
+[1] Fetch            robots.txt, timeouts, honest user agent
       ↓
-[2] Извлечение       HTML → структура: заголовки, абзацы, таблицы, код
+[2] Parse            HTML → DOM (linkedom, no browser)
       ↓
-[3] Очистка          меню, футер, баннеры, реклама, «читайте также»
+[3] Dates and ids    read from the untouched tree, before cleaning strips them
       ↓
-[4] Нормализация     даты → ISO, числа → значения с единицами, валюты
+[4] Clean            menus, footer, banners, ads, "read also"
       ↓
-[5] Отбор            что относится к задаче, что выбросить
+[5] Blocks           headings, paragraphs, lists, tables, code, in order
       ↓
-[6] Нарезка          куски под бюджет, с перекрытием по смыслу
+[6] Facts, anchors   dates → ISO, numbers → values with units, ids restored
       ↓
-[7] Сборка           markdown для чтения или state для решений
+[7] Chunk            pieces under a two-dimensional budget, with anchors
       ↓
-[8] Отдача           JSON с материалом, полями и происхождением
+[8] Assemble         state for decisions, markdown for reading, usage, warnings
 ```
 
-Шаги 1–4 это обычный код, и в этом их сила: они детерминированы, дёшевы и
-проверяются тестами. Шаг 5 единственный, где нужна модель.
+Every step is ordinary code, and that is its strength: deterministic, cheap,
+covered by tests. Relevance selection is the only place a model could be
+useful, and it is a port (`Selector`) with no default implementation.
 
-## Шаг 5 отдельно: чем отбирать
+## Selection: what to select with
 
-Здесь развилка, и от неё зависит экономика всего сервиса.
+This is the fork that decides the economics.
 
-**Вариант А. Правила и эвристики.** Плотность текста, доля ссылок в блоке,
-позиция в документе, повторяемость между страницами одного домена. Ноль
-стоимости, ноль задержки, но слепота к смыслу: абзац про доставку и абзац про
-возврат неразличимы.
+**Option A. Rules and heuristics.** Text density, link share in a block,
+position in the document, repetition across pages of one domain. Zero cost,
+zero latency, blind to meaning: a paragraph about shipping and a paragraph
+about returns look the same.
 
-**Вариант Б. System One модель.** По каждому блоку вопрос «относится ли это к
-задаче». Тысяча блоков уходит пачками, стоит центы, отвечает за доли секунды.
-Смысл различается.
+**Option B. A System One model.** One question per block: "does this relate
+to the task". A thousand blocks go in batches, cost cents, come back in a
+fraction of a second. Meaning is distinguished.
 
-**Вариант В. Гибрид, и это наш выбор.** Правила снимают очевидный мусор
-бесплатно — навигацию, футер, куки-баннер. Модель работает только на том, что
-осталось, и только когда в запросе указана задача. Без задачи режим
-вырождается в «дай мне чистый markdown», и модель не зовётся вовсе.
+**Option C. Hybrid, and this is our choice.** Rules remove the obvious junk
+for free: navigation, footer, cookie banner. A model works only on what is
+left, and only when a task is given. Without a task the mode degrades to
+"give me clean state" and no model is called at all.
 
-Отдельная честность: мы будем использовать System One модель, чтобы готовить
-вход для System One модели. Это не курьёз, а нормальная рекурсия, но она
-означает зависимость от вендора, у которого доступ по листу ожидания.
-Поэтому слой отбора делается за интерфейсом, с реализацией на правилах как
-запасной.
+We would be using a System One model to prepare input for a System One model.
+That is not a curiosity but a normal recursion; it does mean a dependency on
+a vendor with a waiting list. So selection sits behind an interface, and the
+rules-only path is the default.
 
-## Форма ответа
+## The result
 
-Главное отличие от «ещё одного reader API» живёт здесь.
+The main difference from "another reader API" lives here.
 
 ```jsonc
 {
   "source": { "url": "…", "fetchedAt": "2026-09-20T10:11:12Z", "status": 200 },
 
-  // Готово к чтению: человеком или генеративной моделью
-  "markdown": "# Заголовок\n\n…",
+  // Ready for reading: by a human or a generative model
+  "markdown": "# Title\n\n…",
 
-  // Готово к решениям: то, ради чего всё затевалось
+  // Ready for decisions: what this is all for
   "state": {
     "title": "…",
-    "publishedAt": "2026-09-15",     // из прозы, уже датой
+    "publishedAt": "2026-09-15",     // out of the prose, already a date
     "updatedAt": "2026-09-17",
+    "language": "en",
     "facts": [
-      { "label": "price_per_million_input", "value": 0.042, "unit": "USD" },
-      { "label": "context_tokens", "value": 64000, "unit": "token" }
+      { "label": "price_per_btok", "value": 42, "unit": "USD_per_billion",
+        "context": "Price per Btok: $42", "from": "b7" }
     ],
     "chunks": [
       {
         "id": "c1",
         "text": "…",
         "tokens": 1840,
-        "anchor": "#pricing",         // куда вернуться, чтобы проверить
-        "kind": "pricing"
+        "chars": 7120,
+        "anchor": "#pricing",         // where to go back and check
+        "blocks": ["b1", "b2", "b3"]
       }
     ]
   },
 
-  "usage": { "tokens": 18240, "chunks": 12, "model": "…" }
+  "usage": { "rawTokens": 126447, "stateTokens": 1840, "visibleChars": 7010,
+             "stateChars": 7120, "chunks": 1, "ms": 1238 },
+  "warnings": []
 }
 ```
 
-Три вещи, которые делают эту форму полезной:
+Three things make this shape useful:
 
-1. **Даты и числа вынуты из текста.** Модель решений их не считает, поэтому
-   считаем мы. Это не удобство, это обход её главного ограничения.
-2. **Куски знают свой размер в токенах.** Клиент собирает запрос под бюджет,
-   не гадая.
-3. **У каждого куска есть якорь.** Решение, принятое по материалу, можно
-   проверить на исходной странице. Без этого автоматическое решение
-   недоказуемо.
+1. **Dates and numbers are out of the text.** The decision model does not
+   compute them, so we do. This is not convenience; it works around its main
+   limitation.
+2. **Chunks know their size in tokens and characters.** The client assembles
+   a request under budget without guessing.
+3. **Every chunk has an anchor and every fact names its block.** A decision
+   made on the material can be checked on the source page. Without that an
+   automated decision is unprovable.
 
-## Совместимость с jev-mcp
+Expected outcomes do not throw. They come back as named warnings:
+`robots-disallowed`, `fetch-failed`, `blocked`, `paywall`, `empty-without-js`,
+`no-main-content`, `thin-content`, `fallback-extractor`, `block-split`.
 
-Проверено 21.09.2026 по README `jkudish/jev-mcp` и докам вендора.
+## Fitting jev-mcp
 
-Ниша «агент зовёт Jev» уже занята: `jev-mcp` отдаёт десять типизированных
-инструментов поверх модели и собрал около двухсот звёзд. Подготовкой он не
-занимается принципиально — судит то, что ему передали, а забор и чистку
-оставляет вызывающему. Вендор тоже не даёт инструментов подготовки и прямо
-советует приводить материал к тексту самостоятельно.
+Checked on September 21, 2026 against the `jkudish/jev-mcp` README and the
+vendor docs.
 
-Из этого следует решение: мы не конкурируем, мы состыковываемся. Наш выход
-должен без переходников ложиться во вход `jev-mcp`.
+The "agent calls Jev" niche is taken: `jev-mcp` exposes ten typed tools over
+the model. It does no preparation on principle: it judges what it is given
+and leaves fetching and cleaning to the caller. The vendor offers no
+preparation tools either and advises reducing material to text yourself.
 
-| Ограничение на входе jev-mcp | Значение |
+Hence the decision: we do not compete, we connect. Our output has to fit the
+input of `jev-mcp` without adapters.
+
+| jev-mcp input limit | Value |
 |---|---|
-| Текстовое поле | 2 000 – 50 000 символов |
-| Суммарный бюджет на реранк | 100 000 символов |
-| Кандидатов за вызов | до 250 |
+| Text field | 2 000 – 50 000 characters |
+| Total rerank budget | 100 000 characters |
+| Candidates per call | up to 250 |
 
-Отсюда требование к шагу нарезки: **бюджет двумерный**. Кусок обязан
-одновременно влезать в токены под 32k состояния Jev и в потолок символов на
-поле. Считать только токены недостаточно — на кириллице соотношение символов
-к токенам другое, и кусок, прошедший по токенам, может не пройти по символам.
+This sets the requirement on chunking: **the budget is two-dimensional**. A
+chunk must fit both the token budget under Jev's 32k state and the character
+ceiling per field. Counting tokens alone is not enough: on Cyrillic the
+characters-to-tokens ratio is different, and a chunk that passes on tokens can
+fail on characters.
 
-Цифры вендора и обёртки двигаются, поэтому лежат в конфиге рядом с лимитами
-модели, а не в коде нарезки.
+## Fetching
 
-## Забор страниц
+- `robots.txt` is respected, and not only for ethics: it is what separates a
+  tool people can rely on from a scraper that lives until the first complaint.
+- Plain HTTP with an honest user agent, a timeout, no retries by default.
+- Client-side rendering: some pages are empty without JavaScript. A headless
+  browser costs many times a plain request, so it is not part of the tool;
+  the page comes back with `empty-without-js` and the caller decides.
+- Fetching is a port (`Fetcher`), so a cache, a proxy pool or a browser can be
+  plugged in without touching the pipeline.
 
-- `robots.txt` уважаем, и это не только этика: это то, что отличает сервис,
-  который можно продавать, от скрейпера, который живёт до первой жалобы
-- Кеш по URL с уважением к заголовкам, повторный запрос той же страницы
-  внутри окна не стоит ничего
-- Клиентская отрисовка: часть страниц пустая без исполнения JavaScript.
-  Headless-браузер дороже обычного запроса в разы, поэтому включается только
-  когда простой забор вернул пустоту
-- Пулы адресов и вежливые паузы по доменам. Открытый вопрос: пойдём ли мы в
-  платные прокси, и это прямая статья расходов
+## Stack
 
-## Ключи, лимиты, тарифы
+- **Runtime**: Node 22+, TypeScript with `--experimental-strip-types`, no
+  build step for tests.
+- **Extraction**: Defuddle as the base, Readability as the fallback, our own
+  rules on top. No reason to write cleaning from scratch.
+- **DOM**: linkedom. No browser.
+- **Tokens**: gpt-tokenizer (o200k) as an approximation; swappable through
+  the `Tokenizer` port.
+- **Interfaces**: the library (`sieve()`) and the MCP server (`sieve_page`,
+  `sieve_chunk`) over the same pipeline.
 
-- Ключ на аккаунт, лимиты на ключ: страниц в месяц, запросов в минуту,
-  максимальный размер страницы
-- Считаем не «запросы», а страницы и токены на выходе: это то, что
-  действительно стоит нам денег
-- Идемпотентность по URL и версии задачи, чтобы повтор не списывал дважды
-- Наблюдаемость с первого дня: сколько стоило, сколько заняло, где упало.
-  Сервис без этого невозможно ни чинить, ни тарифицировать
+## Open questions
 
-## Стек
-
-Предварительно, и это то, что стоит обсудить отдельно:
-
-- **Runtime**: Node или Deno. В пользу Node экосистема парсинга, в пользу
-  Deno единый тулинг и права по умолчанию
-- **Извлечение**: готовые библиотеки читаемости как основа, свои правила
-  сверху. Писать своё с нуля незачем
-- **Очередь**: обязательна. Забор страниц это медленный ввод-вывод, и
-  синхронный API на нём развалится под первым же пользователем
-- **Хранилище**: кеш страниц отдельно от метаданных ключей и счётчиков
-- **Открытая часть**: ядро конвейера, шаги 1–6, как библиотека. Хостинг,
-  ключи, лимиты и наблюдаемость остаются закрытыми
-
-## Открытые вопросы
-
-1. Лицензия ядра и граница между открытым и платным. Решается до первого
-   коммита
-2. Платные прокси: берём или живём без них и честно говорим о лимитах
-3. Headless-браузер в первой версии или отложить
-4. ~~Нужен ли MCP-сервер как второй интерфейс, помимо REST~~ — решено
-   21.09.2026: MCP это не второй интерфейс, а главный. Проект стал открытым
-   инструментом без хостинга, и установка одной строкой в агента заменяет
-   собой REST как способ распространения
-5. Что делаем, когда страница защищена платным доступом. Ответ по умолчанию:
-   не обходим, возвращаем честный статус
+1. ~~Licence and the line between open and paid.~~ Decided: MIT, nothing
+   paid, no hosting.
+2. ~~Is an MCP server a second interface next to REST.~~ Decided on
+   September 21, 2026: MCP is the main interface. A one-line install into an
+   agent replaces REST as the way to distribute the tool.
+3. A headless browser: not in the tool. A `Fetcher` implementation on top of
+   one can live in a separate package if it proves necessary.
+4. Paywalled pages: we do not bypass them. The teaser comes back with a
+   `paywall` warning.

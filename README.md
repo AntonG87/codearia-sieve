@@ -207,6 +207,6 @@ npm run bench               # the 20-page benchmark set
 npm run analytics           # the 56-page random sample: rows, CSV, summary
 ```
 
-Design notes — vision, architecture, roadmap, research — are in [`docs/`](docs/).
+Design notes — [vision](docs/01-vision.md) and [architecture](docs/02-architecture.md) — are in [`docs/`](docs/).
 
 <p align="center"><sub>MIT © 2026 Anton Evelson · <a href="https://academy.codearia.com/">Codearia Academy</a></sub></p>
