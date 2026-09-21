@@ -273,3 +273,31 @@ test('table rows stay on separate lines and yield labelled, rated facts', async 
   );
   assert.match(r.state.chunks[0]!.text, /Price \(per Btok \/ per Mtok\) \| jev-1\.13\.0: \$42 \/ \$0\.042\n/);
 });
+
+// Lab run over ten web-dev sources (21 Sept 2026): Google's blogs date their
+// posts as plain text, a theme left an empty container next to a full
+// article, and feed links carried utm parameters that robots.txt forbids.
+test('a plain-text "Published:" line in the untouched tree dates the page', async () => {
+  const html = `<html><body><article><h1>New to the web platform</h1>
+    <div class="meta"><span>Published: May 29, 2026</span></div>
+    <p>${'The platform gained a feature this month and here is what changed. '.repeat(12)}</p></article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://x.test/blog/may' }, { now: NOW, trace: true });
+  assert.equal(r.state.publishedAt, '2026-05-29');
+  assert.equal(r.trace?.dateSource, 'byline');
+});
+
+test('a <time> without a datetime attribute is read from its text', async () => {
+  const html = `<html><body><article><h1>Post</h1><time class="date">September 18, 2026</time>
+    <p>${'Body text of the post, long enough to count as an article. '.repeat(12)}</p></article></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://x.test/post' }, { now: NOW });
+  assert.equal(r.state.publishedAt, '2026-09-18');
+});
+
+test('an empty container beside a full article is not empty-without-js', async () => {
+  const html = `<html><head><script>window.app = 1;</script></head><body>
+    <div class="article-content"></div>
+    <article><h1>animation-trigger</h1><p>${'The CSS animation-trigger property delays the start of an animation until a trigger occurs. '.repeat(30)}</p></article>
+    </body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://x.test/almanac' }, { now: NOW });
+  assert.ok(!r.warnings.some((w) => w.code === 'empty-without-js'), JSON.stringify(r.warnings));
+});

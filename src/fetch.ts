@@ -36,9 +36,32 @@ async function isAllowed(url: string): Promise<boolean> {
   }
 }
 
+/** Query parameters that track the click and never select the content. */
+const TRACKING_PARAM = /^(?:utm_\w+|fbclid|gclid|dclid|yclid|msclkid|mc_cid|mc_eid|_ga|_gl|ref_src|igshid)$/i;
+
+/**
+ * The same page without its tracking parameters. Feeds and social links carry
+ * them, and sites such as habr.com disallow every "?utm_" URL in robots.txt
+ * while serving the clean one — the clean one is what is asked for.
+ */
+export function stripTracking(url: string): string {
+  let u: URL;
+  try {
+    // "&amp;" survives in URLs copied out of HTML and feeds; it is never meant.
+    u = new URL(url.replace(/&amp;/g, '&'));
+  } catch {
+    return url;
+  }
+  const keys = [...u.searchParams.keys()].filter((k) => TRACKING_PARAM.test(k));
+  if (!keys.length) return url;
+  for (const k of keys) u.searchParams.delete(k);
+  return u.toString();
+}
+
 /** Plain HTTP with robots.txt respected. No headless browser, no proxies. */
 export const defaultFetcher: Fetcher = {
-  async get(url: string): Promise<FetchResult> {
+  async get(requested: string): Promise<FetchResult> {
+    const url = stripTracking(requested);
     if (!(await isAllowed(url))) throw new RobotsDisallowed(url);
     const res = await fetch(url, {
       headers: {

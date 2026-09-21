@@ -23,3 +23,6 @@ Thumbs.db
 
 # Console log of the last analytics run; the rows and the summary are what matter.
 bench/analytics/run.log
+
+# Lab runs: scripts and findings are shared, raw results stay local until reviewed
+bench/lab/*/results/

@@ -61,3 +61,12 @@ test('a line that opens with an ISO date is a byline', () => {
   assert.equal(fromByline(['Node.js 22.14.0 (LTS)', '2025-02-11, Version 22.14.0 ‘Jod’ (LTS), @aduh95']), '2025-02-11');
   assert.equal(fromByline(['Numbers 2025-02-11 in the middle do not count']), undefined);
 });
+
+test('tracking parameters are stripped before the fetch', async () => {
+  const { stripTracking } = await import('../src/fetch.ts');
+  assert.equal(stripTracking('https://habr.com/ru/articles/1/?utm_campaign=rss&utm_source=habr'), 'https://habr.com/ru/articles/1/');
+  assert.equal(stripTracking('https://web.dev/blog/x?hl=en&utm_medium=feed'), 'https://web.dev/blog/x?hl=en');
+  assert.equal(stripTracking('https://x.test/a?page=2'), 'https://x.test/a?page=2');
+  assert.equal(stripTracking('https://habr.com/ru/articles/1/?utm_campaign=1&amp;utm_source=habrahabr&amp;utm_medium=rss'), 'https://habr.com/ru/articles/1/');
+  assert.equal(stripTracking('not a url'), 'not a url');
+});

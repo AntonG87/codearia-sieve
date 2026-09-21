@@ -146,6 +146,13 @@ export function findDates(document: Document): FoundDates {
       published: () => fromTime(document, 'datePublished'),
       updated: () => fromTime(document, 'dateModified'),
     },
+    {
+      // "Published: May 29, 2026" as plain text in the untouched tree; the
+      // cleaners usually drop such lines before the blocks are built.
+      source: 'byline',
+      published: () => fromBylineText(document, PUBLISHED_WORDS),
+      updated: () => fromBylineText(document, UPDATED_WORDS),
+    },
   ];
 
   const found: FoundDates = {};
@@ -272,7 +279,30 @@ function fromTime(document: Document, itemprop: string): string | undefined {
   if (specific) return specific.getAttribute('datetime') ?? undefined;
   if (itemprop !== 'datePublished') return undefined;
   const pub = document.querySelector('time[pubdate][datetime]') ?? document.querySelector('time[datetime]');
-  return pub?.getAttribute('datetime') ?? undefined;
+  if (pub) return pub.getAttribute('datetime') ?? undefined;
+  // A <time> without the attribute still names a date in its text.
+  const text = document.querySelector('time')?.textContent?.replace(/\s+/g, ' ').trim();
+  return text && text.length <= 60 ? text : undefined;
+}
+
+const PUBLISHED_WORDS = /^(?:published|posted|date|опубликовано|дата публикации)\b/iu;
+const UPDATED_WORDS = /^(?:updated|last updated|modified|обновлено)\b/iu;
+
+/**
+ * The smallest element whose whole text is a labelled date: "Published: May
+ * 29, 2026". Only short elements are read, so a paragraph that happens to
+ * mention a date never qualifies.
+ */
+function fromBylineText(document: Document, words: RegExp): string | undefined {
+  for (const el of Array.from(document.body?.querySelectorAll('p, span, div, li, time, dt, dd, small') ?? [])) {
+    const text = (el.textContent ?? '').replace(/\s+/g, ' ').trim();
+    if (text.length > 60 || !words.test(text)) continue;
+    // Prefer the innermost element: a wrapper with the same text says nothing new.
+    if (el.children.length === 1 && (el.children[0]!.textContent ?? '').replace(/\s+/g, ' ').trim() === text) continue;
+    const date = parseDate(text.replace(words, '').replace(/^[\s:—–-]+/, ''));
+    if (date) return date;
+  }
+  return undefined;
 }
 
 /** Words that mark a byline; prose is only consulted where one of these appears. */

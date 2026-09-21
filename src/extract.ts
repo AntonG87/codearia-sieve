@@ -32,6 +32,8 @@ export interface ExtractOptions {
  * rarely fits in a tweet.
  */
 const MIN_CONTENT_CHARS = 280;
+/** Above this much extracted text, an empty container is decoration, not the article. */
+const EMPTY_CONTAINER_MAX_CHARS = 2000;
 
 /**
  * Extraction is a chain, not a library call: the best-scoring tools in the
@@ -80,7 +82,10 @@ export async function extract(html: string, url: string, options: ExtractOptions
   // An app shell shows a spinner's worth of text and leaves the rest to
   // JavaScript; "Loading…" is not an article. A declared article container
   // that is empty says the same thing however much menu text surrounds it.
-  if (clientRendered === 'container' || (clientRendered === 'body' && textLength(content) < MIN_CONTENT_CHARS)) {
+  // An empty article container only matters when the cleaner found nothing
+  // substantial elsewhere: many themes leave an unused container in the DOM.
+  const rendered = textLength(content);
+  if ((clientRendered === 'container' && rendered < EMPTY_CONTAINER_MAX_CHARS) || (clientRendered === 'body' && rendered < MIN_CONTENT_CHARS)) {
     warnings.push({ code: 'empty-without-js', detail: clientRendered === 'container' ? 'the article container is empty; its text is loaded by script' : undefined });
   } else if (textLength(content) === 0) {
     warnings.push({ code: 'no-main-content' });

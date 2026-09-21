@@ -49,7 +49,8 @@ async function feedLinks(feed: string, n: number): Promise<string[]> {
   const links: string[] = [];
   for (const m of xml.matchAll(/<item>[\s\S]*?<link>\s*(?:<!\[CDATA\[)?([^<\]\s]+)[\s\S]*?<\/item>/g)) links.push(m[1]!);
   if (!links.length) for (const m of xml.matchAll(/<entry>[\s\S]*?<link[^>]*href="([^"]+)"/g)) links.push(m[1]!);
-  return links.slice(0, n);
+  // Feeds escape the ampersand inside <link>; decode before the URL is used.
+  return links.slice(0, n).map((l) => l.replace(/&amp;/g, '&'));
 }
 
 const sieve = await connect('sieve', 'node', ['dist/mcp/cli.js']);
