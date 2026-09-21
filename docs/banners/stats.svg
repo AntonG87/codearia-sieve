@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 300" width="1600" height="300" role="img" aria-label="Median token saving 98.5 percent; median page 53 718 tokens to 1 106; 1.1 seconds per page; 50 of 56 random pages usable, 9 languages">
+  <defs>
+    <radialGradient id="g1" cx="0.12" cy="0.1" r="0.7">
+      <stop offset="0" stop-color="#FF6B35" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#FF4814" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FF4814" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="0.9" cy="0.95" r="0.7">
+      <stop offset="0" stop-color="#FF2800" stop-opacity="0.45"/>
+      <stop offset="0.5" stop-color="#8C1800" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#8C1800" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="0.7" fill="#F5EFE6" fill-opacity="0.07"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="300" rx="14" fill="#0a0a0a"/>
+  <rect width="1600" height="300" rx="14" fill="url(#g1)"/>
+  <rect width="1600" height="300" rx="14" fill="url(#g2)"/>
+  <rect width="1600" height="300" rx="14" fill="url(#dots)"/>
+  <rect x="0.5" y="0.5" width="1599" height="299" rx="14" fill="none" stroke="#F5EFE6" stroke-opacity="0.12"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#F5EFE6">
+    <!-- tile 1 -->
+    <text x="80" y="92" font-size="18" letter-spacing="3" fill-opacity="0.65">MEDIAN TOKEN SAVING</text>
+    <text x="80" y="176" font-size="84" font-weight="700" fill="#FF6B35">98.5%</text>
+    <text x="80" y="222" font-size="18" fill-opacity="0.65">per page, raw markup → state</text>
+
+    <line x1="440" y1="60" x2="440" y2="240" stroke="#F5EFE6" stroke-opacity="0.14"/>
+
+    <!-- tile 2 -->
+    <text x="490" y="92" font-size="18" letter-spacing="3" fill-opacity="0.65">MEDIAN PAGE</text>
+    <text x="490" y="176" font-size="60" font-weight="700">53 718</text>
+    <text x="490" y="222" font-size="18" fill-opacity="0.65">tokens before</text>
+    <text x="760" y="176" font-size="60" font-weight="700" fill="#FF6B35">→ 1 106</text>
+    <text x="810" y="222" font-size="18" fill-opacity="0.65">tokens after</text>
+
+    <line x1="1010" y1="60" x2="1010" y2="240" stroke="#F5EFE6" stroke-opacity="0.14"/>
+
+    <!-- tile 3 -->
+    <text x="1060" y="92" font-size="18" letter-spacing="3" fill-opacity="0.65">TIME PER PAGE</text>
+    <text x="1060" y="176" font-size="60" font-weight="700">1.1 s</text>
+    <text x="1060" y="222" font-size="18" fill-opacity="0.65">median · no browser, no model</text>
+
+    <line x1="1330" y1="60" x2="1330" y2="240" stroke="#F5EFE6" stroke-opacity="0.14"/>
+
+    <!-- tile 4 -->
+    <text x="1380" y="92" font-size="18" letter-spacing="3" fill-opacity="0.65">SAMPLE</text>
+    <text x="1380" y="150" font-size="44" font-weight="700">50 / 56</text>
+    <text x="1380" y="186" font-size="18" fill-opacity="0.65">random pages usable</text>
+    <text x="1380" y="222" font-size="18" fill-opacity="0.65">9 languages</text>
+  </g>
+</svg>
