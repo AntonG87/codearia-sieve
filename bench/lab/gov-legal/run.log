@@ -1,0 +1,30 @@
+== sieve_page ==
+gov.uk visa fees        67735 →   8812 chunks  1 facts 417 money 417 rows 189 -                      Home Office immigration and nationality 
+gov.uk passport         21684 →    460 chunks  1 facts  10 money   9 rows  10 -                      Passport fees                           
+irs brackets            28021 →    998 chunks  1 facts  60 money  39 rows  32 -                      Federal income tax rates and brackets   
+uscis fees              30967 →   1276 chunks  1 facts   2 money   2 rows   0 -                      Fee Schedule                            
+canada fees              4448 →     90 chunks  1 facts   0 money   0 rows   0 http-error             Not Found                               
+eur-lex gdpr              785 →      4 chunks  0 facts   0 money   0 rows   0 blocked                JavaScript is disabled                  
+legislation.gov.uk      14057 →   1020 chunks  1 facts   0 money   0 rows   0 -                      Data Protection Act 2018                
+gov.il fees              2666 →      4 chunks  0 facts   0 money   0 rows   0 blocked                Just a moment...                        
+sec 10-k                 1169 →    540 chunks  1 facts   3 money   0 rows   0 blocked                Your Request Originates from an Undeclar
+federalregister          2856 →    166 chunks  1 facts   0 money   0 rows   0 blocked                Federal Register :: Request Access      
+companies house         44328 →   2819 chunks  1 facts  98 money  96 rows 128 -                      Companies House fees                    
+ato                       183 →     81 chunks  1 facts   0 money   0 rows   0 blocked|fallback-extra Access Denied                           
+
+== jev_extract: one question per page ==
+  gov.uk visa fees     -                  review      0.98 | The fee for a Skilled Worker visa application (up to 3 years) made out
+  gov.uk passport      £102               auto        0.98 | The fee for a standard adult passport applied for online.
+  irs brackets         37%                auto        1.00 | The top marginal federal income tax rate for tax year 2025.
+  uscis fees           -                  not_found   1.00 | The filing fee for Form N-400 (naturalization) filed on paper.
+  legislation.gov.uk   2018               auto        0.99 | The year the Data Protection Act was passed.
+  companies house      £100               review      1.00 | The fee to incorporate a company online.
+
+== jev_verify: Sieve's currency facts as claims ==
+  gov.uk visa fees     verified 8 contradicted 0 unsupported 0 of 8
+  gov.uk passport      verified 8 contradicted 0 unsupported 0 of 8
+  irs brackets         verified 8 contradicted 0 unsupported 0 of 8
+  uscis fees           verified 2 contradicted 0 unsupported 0 of 2
+  companies house      verified 8 contradicted 0 unsupported 0 of 8
+
+6/12 usable; raw 218899 → state 16270; block-split on 0
