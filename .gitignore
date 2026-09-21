@@ -26,3 +26,6 @@ bench/analytics/run.log
 
 # Lab runs: scripts and findings are shared, raw results stay local until reviewed
 bench/lab/*/results/
+
+# The lab: scenario scripts and notes used to find bugs; stays on the machine
+bench/lab/
