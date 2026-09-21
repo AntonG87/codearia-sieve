@@ -27,7 +27,6 @@ rows stay in `*/results/` on the machine that ran them.
 | 21.09 | title suffixes `… \| Blog` on Google's sites | lab 1 |
 | 21.09 | relevance judged on 1 800 chars punishes long tutorials with a preamble | lab 1 |
 | 21.09 | 16/50 `review` classifications — class descriptions need precedence | lab 1 |
-| 21.09 | 100k-token page: check chunk count against the 20 000-token budget | lab 1 |
 
 ## Next scenarios
 

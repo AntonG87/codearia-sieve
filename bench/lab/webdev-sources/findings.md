@@ -57,7 +57,7 @@ The first run scored relevance 0 for every source because of it.
 - **16 of 50 classifications on `review`.** Mostly `tutorial` vs `analysis`
   and one `sponsored` (Chrome's WebMCP origin trial post). Class descriptions
   in `rules.json` can be tightened with precedence rules.
-- **freecodecamp GraphRAG post: 172 167 → 103 612 tokens.** A 100k-token
-  tutorial with 218 code blocks. Not a bug — the tool keeps what is there —
-  but the `depth` rule caps such pages and the chunk count should be checked
-  against the 20 000-token budget in the next lab.
+- **freecodecamp GraphRAG post: 172 167 → 104 268 tokens.** A 100k-token
+  tutorial with 218 code blocks, cut into 10 chunks under the 20 000-token
+  budget with no `block-split`. Not a bug — the tool keeps what is there — but
+  the `depth` rule caps such pages by design.
