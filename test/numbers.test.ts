@@ -147,3 +147,16 @@ test('Eastern Arabic digits are read, and "ago" durations are not facts', () => 
   const he = extractFacts([block('לפני 5 דקות. הנסיעה ארכה 40 דקות.')], 'he');
   assert.deepEqual(he.map((f) => [f.value, f.unit]), [[40, 'min']]);
 });
+
+// Lab 8 (recipes): quantities are the facts a cooking agent needs, and
+// none of them had a unit the scanner knew.
+test('kitchen units, oven temperatures and servings become facts', () => {
+  const en = extractFacts([block('Cream 250 g butter with 1 cup sugar and 2 tbsp vanilla; bake at 350 degrees F (175 degrees C) for 12 minutes. Serves 4 people. Preheat to 190C/170C fan. Yield: 24 cookies, 19g carbs.')], 'en');
+  assert.deepEqual(en.map((f) => [f.value, f.unit]), [[250, 'g'], [1, 'cup'], [2, 'tbsp'], [350, '°F'], [175, '°C'], [12, 'min'], [190, '°C'], [170, '°C'], [19, 'g']]);
+  const ru = extractFacts([block('Возьмите 500 г творога, 200 мл молока и 2 ст. л. муки; выпекать при 180 градусах 25 минут. 6 порций.')], 'ru');
+  assert.deepEqual(ru.map((f) => [f.value, f.unit]), [[500, 'g'], [200, 'ml'], [2, 'tbsp'], [180, '°C'], [25, 'min'], [6, 'serving']]);
+  const de = extractFacts([block('400 g Mehl, 2 EL Öl, bei 180 °C 40 Min. backen. 4 Portionen.')], 'de');
+  assert.deepEqual(de.map((f) => [f.value, f.unit]), [[400, 'g'], [2, 'tbsp'], [180, '°C'], [40, 'min'], [4, 'serving']]);
+  // A weight in pounds is not sterling.
+  assert.deepEqual(extractFacts([block('It weighs 300 pounds and costs £300.')], 'en').map((f) => [f.value, f.unit]), [[300, 'lb'], [300, 'GBP']]);
+});

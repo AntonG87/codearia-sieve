@@ -30,6 +30,19 @@ const UNITS: [RegExp, string][] = [
   [/^(?:days?|дн(?:ей|я)|день|ימים|יום|يوم|أيام|يوماً)(?!\p{L})/iu, 'day'],
   [/^(?:km|км|ק["״]מ|كم|كيلومتر(?:ات)?)(?!\p{L})/iu, 'km'],
   [/^(?:kg|кг|ק["״]ג|كغ|كجم|كيلوغرام(?:ات)?)(?!\p{L})/iu, 'kg'],
+  // Kitchen and workshop units: a recipe's facts are its quantities.
+  [/^(?:mg|мг)(?!\p{L})/iu, 'mg'],
+  [/^(?:g|gr|grams?|gramm?e?s?|г|гр|грамм(?:а|ов)?|جرام|غرام|グラム)(?!\p{L})/iu, 'g'],
+  [/^(?:ml|mL|мл|millilit(?:er|re)s?|миллилитр(?:а|ов)?)(?!\p{L})/iu, 'ml'],
+  [/^(?:l|L|л|lit(?:er|re)s?|литр(?:а|ов)?|Liter)(?!\p{L})/u, 'l'],
+  [/^(?:cups?|чашк[иа]?|стакан(?:а|ов)?|Tassen?|tasses?)(?!\p{L})/iu, 'cup'],
+  [/^(?:tbsp|tablespoons?|ст\.\s?л(?:\.|ожк[иа])?|EL|c\.\s?à\s?s\.?|cuill(?:ère|ere)s?\s+à\s+soupe)(?!\p{L})/iu, 'tbsp'],
+  [/^(?:tsp|teaspoons?|ч\.\s?л(?:\.|ожк[иа])?|TL|c\.\s?à\s?c\.?|cuill(?:ère|ere)s?\s+à\s+café)(?!\p{L})/iu, 'tsp'],
+  [/^(?:oz|ounces?)(?!\p{L})/iu, 'oz'],
+  [/^(?:lbs?|pounds?)(?!\p{L})/iu, 'lb'],
+  [/^(?:°\s?C|℃|degrees?\s+(?:C|celsius)|celsius|градус(?:ов|а|ах|ам|ами)?(?:\s*(?:C|по\s+цельсию))?|Grad(?:\s+Celsius)?|度)(?!\p{L})/iu, '°C'],
+  [/^(?:°\s?F|℉|degrees?\s+F(?:ahrenheit)?|fahrenheit)(?!\p{L})/iu, '°F'],
+  [/^(?:servings?|serves|portions?|Portionen|порци[йия]|personnes|人分)(?!\p{L})/iu, 'serving'],
   [/^(?:percent|אחוז(?:ים)?|بالمئة|في المئة|بالمائة|في المائة)(?!\p{L})/iu, '%'],
   [/^(?:TB|ТБ)(?!\p{L})/u, 'TB'],
   [/^(?:GB|ГБ)(?!\p{L})/u, 'GB'],
@@ -77,7 +90,8 @@ const SCALES: [RegExp, number][] = [
 const CURRENCY_WORDS: [RegExp, string][] = [
   [/^(?:dollars?|долл(?:аров|ара|ар)?|דולר(?:ים)?|دولار(?:ات|اً)?)(?!\p{L})/iu, 'USD'],
   [/^(?:euros?|евро|אירו|يورو)(?!\p{L})/iu, 'EUR'],
-  [/^(?:pounds?|فونت|جنيه(?:ات)?\s+(?:إسترليني|استرليني))(?!\p{L})/iu, 'GBP'],
+  // "pounds" alone is a weight; sterling is written £ or GBP.
+  [/^(?:pounds?\s+sterling|فونت|جنيه(?:ات)?\s+(?:إسترليني|استرليني))(?!\p{L})/iu, 'GBP'],
   [/^(?:shekels?|שקל(?:ים)?|ש["״]ח|שח|شيكل|شواكل)(?!\p{L})/iu, 'ILS'],
   [/^(?:руб(?:лей|ля|ль)?\.?|rubles?)(?!\p{L})/iu, 'RUB'],
   [/^(?:ريال(?:ات)?)(?!\p{L})/iu, 'SAR'],
@@ -242,6 +256,11 @@ function scan(source: string, locale: NumberLocale, inTable = false): Hit[] {
     }
     if (!unit && /^%/.test(after)) {
       unit = '%';
+      after = after.slice(1).replace(/^\s+/, '');
+    }
+    // "190C/170C fan", "350F": a temperature letter glued to the number.
+    if (!unit && /^[CF](?!\p{L})/u.test(rawAfter)) {
+      unit = rawAfter[0] === 'C' ? '°C' : '°F';
       after = after.slice(1).replace(/^\s+/, '');
     }
     if (!unit) {
