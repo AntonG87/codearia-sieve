@@ -160,3 +160,26 @@ test('kitchen units, oven temperatures and servings become facts', () => {
   // A weight in pounds is not sterling.
   assert.deepEqual(extractFacts([block('It weighs 300 pounds and costs £300.')], 'en').map((f) => [f.value, f.unit]), [[300, 'lb'], [300, 'GBP']]);
 });
+
+// Lab 9 (number locales): decimal commas were read right in de/fr, but the
+// scale and currency words of ten languages were unknown, so GDP articles
+// yielded almost no facts.
+test('scale and currency words across languages', () => {
+  const cases: [string, string, [number, string][]][] = [
+    ['de', 'Das BIP betrug 4.185,55 Mrd. US-Dollar, ein Plus von 1,2 %.', [[4185.55e9, 'USD'], [1.2, '%']]],
+    ['fr', 'Le PIB atteint 2 800 milliards de dollars et 1,5 million d\'euros.', [[2.8e12, 'USD'], [1.5e6, 'EUR']]],
+    ['es', 'El PIB fue de 1.400 mil millones de dólares.', [[1.4e12, 'USD']]],
+    ['it', 'Il PIL è di 2.100 miliardi di dollari.', [[2.1e12, 'USD']]],
+    ['pl', 'PKB wyniósł 800 mld dolarów oraz 3 mln złotych.', [[8e11, 'USD'], [3e6, 'PLN']]],
+    ['tr', 'GSYH 1,1 trilyon dolar ve 500 milyar TL.', [[1.1e12, 'USD'], [5e11, 'TRY']]],
+    ['pt', 'O PIB foi de 2,1 trilhões de dólares e 500 bilhões de reais.', [[2.1e12, 'USD'], [5e11, 'BRL']]],
+    ['ja', 'GDPは26,185億ドル、対前年比2.5%増。', [[26185e8, 'USD'], [2.5, '%']]],
+    ['zh', '国内生产总值为18万亿美元。', [[18e12, 'USD']]],
+    // Korean compounds ('1조 8000억') are read as their last group; the first is a known gap.
+    ['ko', 'GDP는 8000억 달러였다.', [[8000e8, 'USD']]],
+  ];
+  for (const [lang, text, expected] of cases) {
+    const got = extractFacts([block(text)], lang).map((f) => [f.value, f.unit]);
+    assert.deepEqual(got, expected, `${lang}: ${JSON.stringify(got)}`);
+  }
+});

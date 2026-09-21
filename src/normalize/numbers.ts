@@ -81,15 +81,35 @@ const HEADER_RATES: [RegExp, string][] = [
 
 /** Word multipliers that follow a number: "250 thousand", "3 млн", "188 тысяч". */
 const SCALES: [RegExp, number][] = [
-  [/^(?:thousand|тыс\.?|тысяч[иа]?|אלף|אלפים|ألف|آلاف|الف)(?!\p{L})/iu, 1e3],
-  [/^(?:million|mln|млн\.?|миллион(?:а|ов)?|מיליון|מיליוני|مليون|ملايين)(?!\p{L})/iu, 1e6],
-  [/^(?:billion|bn|млрд\.?|миллиард(?:а|ов)?|מיליארד|מיליארדי|مليار|مليارات)(?!\p{L})/iu, 1e9],
+  // Order matters where one word prefixes another: "mil millones" before "mil".
+  [/^(?:mil\s+millones|thousand\s+million)(?!\p{L})/iu, 1e9],
+  [/^(?:thousand|тыс\.?|тысяч[иа]?|אלף|אלפים|ألف|آلاف|الف|Tsd\.?|Tausend|mille|mil|tys\.?|tysi[ąę]c[ey]?|bin|千)(?!\p{L})/iu, 1e3],
+  [/^(?:million|mln|млн\.?|миллион(?:а|ов)?|מיליון|מיליוני|مليون|ملايين|Mio\.?|Millionen?|millions?|millones|milione|milioni|milhões|milhão|milyon|mil\.?)(?!\p{L})/iu, 1e6],
+  [/^(?:billion|bn|млрд\.?|миллиард(?:а|ов)?|מיליארד|מיליארדי|مليار|مليارات|Mrd\.?|Milliarden?|milliards?|miliardi|miliardo|mld|bilhões|bilhão|milyar)(?!\p{L})/iu, 1e9],
+  [/^(?:trillion|trn|трлн\.?|триллион(?:а|ов)?|Bio\.?|Billionen?|billions?|billones|trilhões|trilyon)(?!\p{L})/iu, 1e12],
+  // CJK scales attach straight to the digits and to the currency after them.
+  [/^(?:万亿|萬億)/u, 1e12],
+  [/^(?:万|萬|만)/u, 1e4],
+  [/^(?:億|亿|억)/u, 1e8],
+  [/^(?:兆|조)/u, 1e12],
 ];
 
 /** Currency words after the number: "300 dollars", "3,000 ש"ח", "500 دولار". */
 const CURRENCY_WORDS: [RegExp, string][] = [
-  [/^(?:dollars?|долл(?:аров|ара|ар)?|דולר(?:ים)?|دولار(?:ات|اً)?)(?!\p{L})/iu, 'USD'],
-  [/^(?:euros?|евро|אירו|يورو)(?!\p{L})/iu, 'EUR'],
+  [/^(?:(?:US-?|U\.S\.\s?)?dollars?|долл(?:аров|ара|ар)?|דולר(?:ים)?|دولار(?:ات|اً)?|dólares|dólar|dollari|dollaro|dolar[óo]w|dolar[óo]v|dolar|dolares)(?!\p{L})/iu, 'USD'],
+  [/^(?:euros?|евро|אירו|يورو|euro)(?!\p{L})/iu, 'EUR'],
+  [/^(?:yen)(?!\p{L})/iu, 'JPY'],
+  [/^(?:yuan|renminbi)(?!\p{L})/iu, 'CNY'],
+  [/^(?:won)(?!\p{L})/iu, 'KRW'],
+  // CJK currency words are glued to the particle that follows ("달러였다"); no boundary check.
+  [/^(?:米ドル|ドル|美元|美金|달러)/u, 'USD'],
+  [/^(?:ユーロ|欧元|유로)/u, 'EUR'],
+  [/^(?:円|엔)/u, 'JPY'],
+  [/^(?:人民币|元|위안)/u, 'CNY'],
+  [/^(?:원)/u, 'KRW'],
+  [/^(?:zł|złotych|złote|zloty|PLN)(?!\p{L})/iu, 'PLN'],
+  [/^(?:TL|lira(?:sı)?|₺)(?!\p{L})/u, 'TRY'],
+  [/^(?:R\$|reais|real)(?!\p{L})/iu, 'BRL'],
   // "pounds" alone is a weight; sterling is written £ or GBP.
   [/^(?:pounds?\s+sterling|فونت|جنيه(?:ات)?\s+(?:إسترليني|استرليني))(?!\p{L})/iu, 'GBP'],
   [/^(?:shekels?|שקל(?:ים)?|ש["״]ח|שח|شيكل|شواكل)(?!\p{L})/iu, 'ILS'],
@@ -103,9 +123,10 @@ const CURRENCY_WORDS: [RegExp, string][] = [
  * A number token: digits with optional separators inside. How the separators
  * are read is decided afterwards, per language.
  */
-// A sign counts only when nothing letter-like precedes it: Hebrew glues a
-// prefix to a number with a hyphen ("ב-3,000" is "in 3,000", not minus).
-const NUMBER = /(?<![\p{L}\p{N}.,])([-+]?)(\d(?:[\d ,. ]*\d)?)(?![\d])/gu;
+// The sign counts only when no letter precedes it: Hebrew glues a prefix to
+// a number with a hyphen ("ב-3,000" is "in 3,000"), while Japanese glues a
+// particle straight to the digits ("は26,185億") and the digits must still match.
+const NUMBER = /(?<![\w.,])(?:(?<!\p{L})([-+]))?(\d(?:[\d ,. ]*\d)?)(?![\d])/gu;
 
 /** Durations that read as timestamps when wrapped in "ago" words. */
 const DURATIONS = new Set(['s', 'min', 'h', 'day']);
@@ -125,7 +146,7 @@ export type NumberLocale = 'ru' | 'en' | 'unknown';
 /** Language tag → separator convention. Only the prefix matters. */
 export function localeFor(language?: string): NumberLocale {
   const tag = (language ?? '').toLowerCase();
-  if (/^(ru|uk|be|kk|de|fr|es|it|pl|cs|tr)/.test(tag)) return 'ru';
+  if (/^(ru|uk|be|kk|de|fr|es|it|pl|cs|tr|pt|nl|sv|da|fi|no|nb|hu|ro|el|hr|sk|sl|bg|sr|id|vi)/.test(tag)) return 'ru';
   // Hebrew and Arabic press write 3,322 and 0.5 the English way.
   if (/^(en|ja|zh|ko|he|ar)/.test(tag)) return 'en';
   return 'unknown';
@@ -231,6 +252,8 @@ function scan(source: string, locale: NumberLocale, inTable = false): Hit[] {
       if (s) {
         value *= factor;
         after = after.slice(s[0].length).replace(/^\s+/, '');
+        // "milliards de dollars", "millions d'euros", "mil millones de dólares".
+        after = after.replace(/^(?:de|di|des|of|d['’])\s*/i, '');
         break;
       }
     }
