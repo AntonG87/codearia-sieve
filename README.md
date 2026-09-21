@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banners/01-hero.png" alt="codearia-sieve — web pages into decision-ready state" width="100%">
+  <img src="docs/banners/01-hero.webp" alt="codearia-sieve — web pages into decision-ready state" width="100%">
 </p>
 
 <h1 align="center">codearia-sieve</h1>
@@ -72,7 +72,7 @@ Everything else — menus, footers, banners, tag rows, "read more" — is remove
 <br>
 
 <p align="center">
-  <img src="docs/banners/02-before-after.png" alt="Today: the agent fetches the page and the model does the cleaning. With codearia-sieve: one call, ready state, the model only decides." width="100%">
+  <img src="docs/banners/02-before-after.webp" alt="Today: the agent fetches the page and the model does the cleaning. With codearia-sieve: one call, ready state, the model only decides." width="100%">
 </p>
 
 ## Who it is for
@@ -86,7 +86,7 @@ Everything else — menus, footers, banners, tag rows, "read more" — is remove
 <br>
 
 <p align="center">
-  <img src="docs/banners/03-pipeline.png" alt="The pipeline: fetch, parse, dates and ids from the untouched tree, clean, blocks, facts and anchors, chunk, assemble. Select is optional and no model runs by default." width="100%">
+  <img src="docs/banners/03-pipeline.webp" alt="The pipeline: fetch, parse, dates and ids from the untouched tree, clean, blocks, facts and anchors, chunk, assemble. Select is optional and no model runs by default." width="100%">
 </p>
 
 ## How it works
@@ -136,7 +136,7 @@ Expected outcomes never throw. They come back as warnings, each named:
 <br>
 
 <p align="center">
-  <img src="docs/banners/04-mcp.png" alt="You give Claude Code a rule in plain words. Claude calls sieve_page, gets state, asks Jev typed questions through jev-mcp, gets scores with probabilities, sorts and writes up. Sieve prepares. Jev judges. Claude writes." width="100%">
+  <img src="docs/banners/04-mcp.webp" alt="You give Claude Code a rule in plain words. Claude calls sieve_page, gets state, asks Jev typed questions through jev-mcp, gets scores with probabilities, sorts and writes up. Sieve prepares. Jev judges. Claude writes." width="100%">
 </p>
 
 ## Use it from an agent
