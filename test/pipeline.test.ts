@@ -301,3 +301,23 @@ test('an empty container beside a full article is not empty-without-js', async (
   const r = await sieve({ kind: 'html', html, url: 'https://x.test/almanac' }, { now: NOW });
   assert.ok(!r.warnings.some((w) => w.code === 'empty-without-js'), JSON.stringify(r.warnings));
 });
+
+// Lab 2 (SEO competitor pages): three 404 pages and four script-rendered
+// shops passed as usable, and a judge then ranked a 404 page third.
+test('a themed 404 page is reported as http-error, not as content', async () => {
+  const html = `<html><body><nav>${'<a href="/x">Shop</a> '.repeat(40)}</nav>
+    <main><h1>404 Error: Page Not Found</h1><p>The page you are looking for does not exist. Try our best sellers below.</p>
+    <ul>${'<li><a href="/p">Desk 60x30 — $499</a></li>'.repeat(8)}</ul></main></body></html>`;
+  const fetcher: Fetcher = { get: async () => ({ html, status: 404, finalUrl: 'https://shop.example/gone' }) };
+  const r = await sieve({ kind: 'url', url: 'https://shop.example/gone' }, { fetcher, now: NOW });
+  assert.ok(r.warnings.some((w) => w.code === 'http-error' && /404/.test(w.detail ?? '')), JSON.stringify(r.warnings));
+});
+
+test('a scripted product page with a few hundred visible characters is empty-without-js', async () => {
+  const html = `<html><head>${('<script>window.__DATA__ = {"p": "' + 'x'.repeat(400) + '"};</script>').repeat(120)}</head><body>
+    <header>${'<a href="/c">Category</a> '.repeat(60)}</header>
+    <main><div id="app"><h1>Product details</h1><p>Loading product…</p></div></main>
+    <footer>${'<a href="/f">Footer link</a> '.repeat(60)}</footer></body></html>`;
+  const r = await sieve({ kind: 'html', html, url: 'https://shop.example/p/1' }, { now: NOW });
+  assert.ok(r.warnings.some((w) => w.code === 'empty-without-js'), JSON.stringify(r.warnings));
+});

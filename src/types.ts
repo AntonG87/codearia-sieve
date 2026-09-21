@@ -108,6 +108,8 @@ export interface Warning {
     | 'fetch-failed'
     /** The site answered with a bot challenge or a refusal, not a page. */
     | 'blocked'
+    /** A 4xx/5xx answer that still rendered an error page; not the page asked for. */
+    | 'http-error'
     /** The article is behind a subscription; what came back is the teaser. */
     | 'paywall'
     | 'empty-without-js'

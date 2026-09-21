@@ -72,6 +72,10 @@ export async function sieve(input: Input, options: SieveOptions = {}): Promise<R
       (status !== 200 && extracted.blocks.length === 0));
   if (blocked) {
     warnings.push({ code: 'blocked', detail: `status ${status}${extracted.title ? `, "${extracted.title}"` : ''}` });
+  } else if (extracted && status >= 400) {
+    // A 404 or a 500 with a themed error page still carries menus and a
+    // title; whatever was extracted is not the page that was asked for.
+    warnings.push({ code: 'http-error', detail: `status ${status}${extracted.title ? `, "${extracted.title}"` : ''}` });
   }
   warnings.push(...(extracted?.warnings ?? []).filter((w) => !(blocked && w.code === 'no-main-content')));
   // A teaser behind a subscription wall is not the article; say so instead of "thin".

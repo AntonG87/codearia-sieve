@@ -127,6 +127,7 @@ Expected outcomes never throw. They come back as warnings, each named:
 |---|---|
 | `robots-disallowed` | the site asks crawlers to stay out; we did not fetch |
 | `blocked` | a bot challenge or a refusal (403, 405, 429, "Just a moment…"), with the status |
+| `http-error` | a 404 or a 500 that still rendered an error page; not the page you asked for |
 | `paywall` | the page marks its article as not free; you got the teaser |
 | `empty-without-js` | the article container is empty and a script would fill it |
 | `thin-content` | a big page that yielded little prose — a front page, a listing |

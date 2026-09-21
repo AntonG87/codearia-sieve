@@ -123,7 +123,7 @@ Three things make this shape useful:
    automated decision is unprovable.
 
 Expected outcomes do not throw. They come back as named warnings:
-`robots-disallowed`, `fetch-failed`, `blocked`, `paywall`, `empty-without-js`,
+`robots-disallowed`, `fetch-failed`, `blocked`, `http-error`, `paywall`, `empty-without-js`,
 `no-main-content`, `thin-content`, `fallback-extractor`, `block-split`.
 
 ## Fitting jev-mcp

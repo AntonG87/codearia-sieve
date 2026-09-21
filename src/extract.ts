@@ -34,6 +34,15 @@ export interface ExtractOptions {
 const MIN_CONTENT_CHARS = 280;
 /** Above this much extracted text, an empty container is decoration, not the article. */
 const EMPTY_CONTAINER_MAX_CHARS = 2000;
+/** Below this much visible prose, a scripted page is an app shell waiting for its data. */
+const EMPTY_BODY_CHARS = 500;
+/** A shell is heavy: a small static page with little text is just a small page. */
+const SHELL_MIN_HTML = 50_000;
+
+/** Whether the page carries any script at all; a static page cannot be a shell. */
+function scripted(document: Document): boolean {
+  return document.querySelectorAll('script').length > 0;
+}
 
 /**
  * Extraction is a chain, not a library call: the best-scoring tools in the
@@ -84,9 +93,15 @@ export async function extract(html: string, url: string, options: ExtractOptions
   // that is empty says the same thing however much menu text surrounds it.
   // An empty article container only matters when the cleaner found nothing
   // substantial elsewhere: many themes leave an unused container in the DOM.
+  // A product page whose main region holds a few hundred characters of
+  // visible prose under a hundred kilobytes of script is the same shell.
+  // Heavy markup, scripts, and almost no prose in the main region: the
+  // fallback extractor may still scrape menus into `content`, so the main
+  // region is what is measured, not the extraction.
   const rendered = textLength(content);
-  if ((clientRendered === 'container' && rendered < EMPTY_CONTAINER_MAX_CHARS) || (clientRendered === 'body' && rendered < MIN_CONTENT_CHARS)) {
-    warnings.push({ code: 'empty-without-js', detail: clientRendered === 'container' ? 'the article container is empty; its text is loaded by script' : undefined });
+  const heavyShell = scripted(original) && bodyChars < EMPTY_BODY_CHARS && html.length > SHELL_MIN_HTML;
+  if ((clientRendered === 'container' && rendered < EMPTY_CONTAINER_MAX_CHARS) || (clientRendered === 'body' && rendered < MIN_CONTENT_CHARS) || heavyShell) {
+    warnings.push({ code: 'empty-without-js', detail: clientRendered === 'container' ? 'the article container is empty; its text is loaded by script' : `${bodyChars} visible characters on a scripted page` });
   } else if (textLength(content) === 0) {
     warnings.push({ code: 'no-main-content' });
   }
