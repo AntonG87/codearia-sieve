@@ -30,7 +30,7 @@ npm i codearia-sieve        # or the library
   <img src="docs/banners/stats.svg" alt="Median token saving 98.5%. Median page: 53 718 tokens before, 1 106 after. 1.1 s per page. 50 of 56 random pages usable, 9 languages." width="100%">
 </p>
 
-<p align="center"><sub><strong>Measured, not promised.</strong> The numbers come from a live run over 56 random pages on 21 September 2026 — fresh news from nine RSS feeds in seven languages, random Wikipedia articles, docs, blogs, government sites, recipes, shops. Every row is in <a href="bench/analytics/">bench/analytics/</a>, and <code>npm run analytics</code> reruns the whole thing. The output was then put in front of a decision model: see <a href="#checked-by-a-judge">Checked by a judge</a>.</sub></p>
+<p align="center"><sub><strong>Measured, not promised.</strong> A live run over random pages picked the same day — fresh news from RSS feeds in several languages, random Wikipedia articles, docs, blogs, government sites, recipes, shops. Every row is in <a href="bench/analytics/">bench/analytics/</a>, and <code>npm run analytics</code> reruns the whole thing. The output was then put in front of a decision model: see <a href="#checked-by-a-judge">Checked by a judge</a>.</sub></p>
 
 <br>
 
