@@ -20,3 +20,6 @@ bench/pages/
 # OS
 .DS_Store
 Thumbs.db
+
+# Console log of the last analytics run; the rows and the summary are what matter.
+bench/analytics/run.log
