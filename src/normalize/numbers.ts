@@ -20,6 +20,12 @@ const CURRENCY_CODES = /^(USD|EUR|GBP|ILS|RUB|JPY|CHF|UAH|KZT)(?!\p{L})/iu;
 
 /** Unit words, longest first so "requests" wins over "req". */
 const UNITS: [RegExp, string][] = [
+  // CJK units attach directly to digits and particles, so no letter boundary.
+  [/^(?:大さじ)/u, 'tbsp'],
+  [/^(?:小さじ)/u, 'tsp'],
+  [/^(?:カップ)/u, 'cup'],
+  [/^(?:分)/u, 'min'],
+  [/^(?:個)/u, 'piece'],
   [/^(?:tokens?|токен(?:ов|а)?)(?!\p{L})/iu, 'token'],
   [/^(?:requests?|запрос(?:ов|а)?|req)(?!\p{L})/iu, 'request'],
   [/^(?:milliseconds?|ms|мс)(?!\p{L})/iu, 'ms'],
@@ -53,6 +59,12 @@ const UNITS: [RegExp, string][] = [
   [/^(?:words?|слов[оа]?)(?!\p{L})/iu, 'word'],
   [/^(?:users?|пользовател(?:ей|я|ь))(?!\p{L})/iu, 'user'],
   [/^(?:views?|просмотр(?:ов|а)?)(?!\p{L})/iu, 'view'],
+];
+
+/** Japanese recipe measures conventionally precede the number. */
+const PREFIX_UNITS: [RegExp, string][] = [
+  [/(?:大さじ)\s*$/u, 'tbsp'],
+  [/(?:小さじ)\s*$/u, 'tsp'],
 ];
 
 /** "per million", "/ M", "за миллиард" → appended to the unit as a rate. */
@@ -246,6 +258,13 @@ function scan(source: string, locale: NumberLocale, inTable = false): Hit[] {
     if (/^[sSсh](?!\p{L})/u.test(rawAfter)) continue;
     let after = rawAfter.replace(/^\s+/, '');
     let unit: string | undefined;
+
+    for (const [re, name] of PREFIX_UNITS) {
+      if (re.test(before)) {
+        unit = name;
+        break;
+      }
+    }
 
     for (const [re, factor] of SCALES) {
       const s = re.exec(after);

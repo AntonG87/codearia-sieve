@@ -138,6 +138,11 @@ test('Hebrew and Arabic currencies, scales and units become facts', () => {
   assert.deepEqual(ar.map((f) => [f.value, f.unit]), [[5e8, 'USD'], [12, '%'], [3, 'day']]);
 });
 
+test('Japanese kitchen units attached to numbers become facts', () => {
+  const facts = extractFacts([block('砂糖 大さじ2、塩 小さじ1、牛乳 200ml、15分焼く。りんご2個と水1カップ。')], 'ja');
+  assert.deepEqual(pairs(facts), [[2, 'tbsp'], [1, 'tsp'], [200, 'ml'], [15, 'min'], [2, 'piece'], [1, 'cup']]);
+});
+
 // Lab 4 follow-ups: Eastern Arabic digits, and "ago" timestamps in bylines.
 test('Eastern Arabic digits are read, and "ago" durations are not facts', () => {
   const ar = extractFacts([block('بلغت التكلفة ٢٥٠ مليون دولار. نُشر قبل 3 ساعات.')], 'ar');
