@@ -35,3 +35,25 @@ jobs:
           fi
       - if: steps.version.outputs.skip != 'true'
         run: npm publish --provenance --access public
+
+      # The official MCP Registry holds metadata only and verifies the npm
+      # package by its `mcpName`; authentication is this workflow's OIDC identity.
+      # The registry reads npm, so wait for the new version to be visible there.
+      - name: Wait for npm to serve the new version
+        run: |
+          V=$(node -p "require('./package.json').version")
+          for i in $(seq 1 20); do
+            if npm view "codearia-sieve@$V" version >/dev/null 2>&1; then exit 0; fi
+            sleep 15
+          done
+          echo "npm never served $V" && exit 1
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+      - name: Set server.json version from the tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' server.json > server.tmp && mv server.tmp server.json
+      - run: ./mcp-publisher validate
+      - run: ./mcp-publisher login github-oidc
+      - run: ./mcp-publisher publish

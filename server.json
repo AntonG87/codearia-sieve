@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.AntonG87/codearia-sieve",
+  "description": "Turns web pages into decision-ready state for AI agents: dates as dates, numbers with units, chunks sized to the model window, and the token bill. No model, no API key.",
+  "repository": {
+    "url": "https://github.com/AntonG87/codearia-sieve",
+    "source": "github"
+  },
+  "version": "0.2.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "codearia-sieve",
+      "version": "0.2.1",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
