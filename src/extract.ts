@@ -94,6 +94,8 @@ export async function extract(source: string, url: string, options: ExtractOptio
     }
   }
 
+  title = normalizeTitle(title, original);
+
   // An app shell shows a spinner's worth of text and leaves the rest to
   // JavaScript; "Loading…" is not an article. A declared article container
   // that is empty says the same thing however much menu text surrounds it.
@@ -118,6 +120,21 @@ export async function extract(source: string, url: string, options: ExtractOptio
   dropped.push(...built.dropped);
 
   return { html: content, title, dates, language, blocks: built.blocks, warnings, dropped, bodyChars, paywalled };
+}
+
+/** Remove a publisher suffix only when the page identifies that publisher. */
+function normalizeTitle(title: string | undefined, document: Document): string | undefined {
+  const siteName = document.querySelector('meta[property="og:site_name"]')?.getAttribute('content')?.trim();
+  if (!siteName) return title;
+
+  let normalized = title?.trim();
+  const escaped = siteName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  normalized = normalized?.replace(new RegExp(`\\s*(?:\\||-|—|::)\\s*${escaped}\\s*$`, 'iu'), '').trim();
+
+  if (!normalized || normalized.toLocaleLowerCase() === siteName.toLocaleLowerCase()) {
+    normalized = document.querySelector('h1')?.textContent?.replace(/\s+/g, ' ').trim() || normalized;
+  }
+  return normalized || undefined;
 }
 
 /** Subscription walls in the languages of the benchmark, plus the schema.org flag. */

@@ -33,6 +33,15 @@ test('title and dates come from markup, as ISO, with their tier recorded', async
   assert.equal(r.trace?.dateSource, 'json-ld');
 });
 
+test('publisher suffixes are removed from titles without losing an article heading', async () => {
+  const article = `<p>${'Enough article text to keep the primary extraction path stable. '.repeat(12)}</p>`;
+  const suffixed = await sieve({ kind: 'html', html: `<html><head><title>New platform features | Example Blog</title><meta property="og:site_name" content="Example Blog"></head><body><article><h1>New platform features</h1>${article}</article></body></html>`, url: URL_ }, { now: NOW });
+  assert.equal(suffixed.state.title, 'New platform features');
+
+  const siteOnly = await sieve({ kind: 'html', html: `<html><head><title>Example Blog</title><meta property="og:site_name" content="Example Blog"></head><body><article><h1>Specific article heading</h1>${article}</article></body></html>`, url: URL_ }, { now: NOW });
+  assert.equal(siteOnly.state.title, 'Specific article heading');
+});
+
 test('without markup, a labelled byline is the only prose consulted', async () => {
   const html = `<html><body><article>
     <h1>Post</h1><p>Posted 3 марта 2026</p>
