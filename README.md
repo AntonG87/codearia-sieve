@@ -13,6 +13,7 @@
 <p align="center">
   <a href="#use-it-from-an-agent"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-FF6B35?style=flat-square"></a>
   <a href="#use-it-as-a-library"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-library-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
+  <a href="https://registry.modelcontextprotocol.io/?search=codearia-sieve"><img alt="MCP Registry" src="https://img.shields.io/badge/MCP%20Registry-listed-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
   <a href="https://www.npmjs.com/package/codearia-sieve"><img alt="npm" src="https://img.shields.io/npm/v/codearia-sieve?style=flat-square&color=F5EFE6&labelColor=0a0a0a"></a>
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-F5EFE6?style=flat-square&labelColor=0a0a0a"></a>
   <img alt="Tests" src="https://img.shields.io/badge/tests-71%20passing%2C%20offline-F5EFE6?style=flat-square&labelColor=0a0a0a">
@@ -149,6 +150,8 @@ You say what you want in plain words. The agent finds the pages, calls `sieve_pa
 ```json
 { "mcpServers": { "sieve": { "command": "npx", "args": ["-y", "codearia-sieve"] } } }
 ```
+
+Listed in the [official MCP Registry](https://registry.modelcontextprotocol.io/?search=codearia-sieve) as `io.github.AntonG87/codearia-sieve`; clients that read the registry can install it by name.
 
 <table>
 <tr>
