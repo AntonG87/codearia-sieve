@@ -1,6 +1,6 @@
 {
   "name": "codearia-sieve",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Turns web pages into decision-ready state: dates as dates, numbers computed, chunks sized for models that classify instead of write.",
   "mcpName": "io.github.AntonG87/codearia-sieve",
   "keywords": [
